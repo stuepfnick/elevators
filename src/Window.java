@@ -50,4 +50,8 @@ public class Window {
     public Collection<SimObject> getRenderObjects() {
         return simObjects;
     }
+
+    public void close() {
+        frame.dispose();
+    }
 }

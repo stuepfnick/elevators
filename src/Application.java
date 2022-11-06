@@ -40,5 +40,6 @@ public class Application {
                 System.out.println("Unknown command!");
             }
         }
+        //System.exit(0);
     }
 }

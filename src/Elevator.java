@@ -49,8 +49,8 @@ public class Elevator implements SimObject {
         }
         if (!actionQueue.isEmpty()) {
             double currentTime = Simulation.getTick() / 1000d;
-            double endTime = currentAction().getEndTime() - 1d / Simulation.FRAMES_PER_SECOND;
-            if (endTime >= currentTime) {
+            double endTime = currentAction().getEndTime() - (deltaTime * 4);
+            if (endTime > currentTime) {
                 Status currentStatus = currentAction().getStatus();
                 Direction direction = currentAction().getDirection();
 
@@ -59,25 +59,9 @@ public class Elevator implements SimObject {
                         speed += ACCELERATION * deltaTime;
                         speed = Math.min(speed, MAX_SPEED);
                     }
-                    case BRAKING -> {
+                    case BRAKING, STOPPED -> {
                         speed -= ACCELERATION * deltaTime;
                         speed = Math.max(speed, 0d);
-                    }
-                    case STOPPED -> {
-                        double overShootMeters = position.y - (nextDestination * Tower.FLOOR_HEIGHT);
-                        double absOverShootMeters = Math.abs(overShootMeters);
-                        if (absOverShootMeters > MAX_DELTA) {
-                            speed += ACCELERATION * deltaTime;
-                            speed = Math.min(speed, MAX_SPEED / 2);
-                            if (overShootMeters > 0) {
-                                direction = Direction.DOWN;
-                            } else {
-                                direction = Direction.UP;
-                            }
-                        } else {
-                            speed -= ACCELERATION * deltaTime;
-                            speed = Math.max(speed, 0d);
-                        }
                     }
                 }
                 switch (direction) {
@@ -87,10 +71,8 @@ public class Elevator implements SimObject {
             } else {
                 Action lastAction = actionQueue.remove();
                 if (lastAction.getStatus() == Status.BRAKING) {
-                    System.out.println((int) (position.x / 10) + " Floor: " + currentFloor + " @elevation: " + position.y);
-                }
-                if (lastAction.getStatus() == Status.STOPPED) {
-                    System.out.println((int) (position.x / 10) + " Floor: " + currentFloor + " @elevation: " + position.y);
+                    System.out.println("Speed: " + speed);
+                    System.out.println((int) (position.x / 10) + " Floor: " + currentFloor + " @elevation: " + String.format("%.14f", position.y));
                 }
             }
         }
@@ -134,12 +116,6 @@ public class Elevator implements SimObject {
     }
 
     @Override
-    public void render(Graphics2D g, float interpolation) {
-        double displayElevation = position.y + velocity * interpolation * Simulation.FIXED_DELTA_TIME;
-        g.fillRect((int) position.x, (int) Math.round(displayElevation / Tower.FLOOR_HEIGHT * 10), 10, 10);
-    }
-
-    @Override
     public void fixedUpdate() {
         position.y += velocity * Simulation.FIXED_DELTA_TIME;
     }
@@ -147,5 +123,11 @@ public class Elevator implements SimObject {
     @Override
     public void update(double deltaTime) {
         updateStatus(deltaTime);
+    }
+
+    @Override
+    public void render(Graphics2D g, float interpolation) {
+        double displayElevation = position.y + velocity * interpolation * Simulation.FIXED_DELTA_TIME;
+        g.fillRect((int) position.x, (int) Math.round(displayElevation / Tower.FLOOR_HEIGHT * 10), 10, 10);
     }
 }
