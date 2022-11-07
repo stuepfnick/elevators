@@ -1,16 +1,16 @@
 public class Action {
-    private final double endTime;
+    private final double duration;
     private final Status status;
     private final Direction direction;
 
-    public Action(double endTime, Status status, Direction direction) {
-        this.endTime = endTime;
+    public Action(double duration, Status status, Direction direction) {
+        this.duration = duration;
         this.status = status;
         this.direction = direction;
     }
 
-    public double getEndTime() {
-        return endTime;
+    public double getDuration() {
+        return duration;
     }
 
     public Status getStatus() {
@@ -24,7 +24,7 @@ public class Action {
     @Override
     public String toString() {
         return "Action{" +
-                "endTime=" + endTime +
+                "endTime=" + duration +
                 ", status=" + status +
                 ", direction=" + direction +
                 '}';

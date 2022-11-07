@@ -20,66 +20,61 @@ public class Elevator implements SimObject {
     private final Queue<Integer> destinationFloors;
     private final Queue<Action> actionQueue;
 
+    private Status currentStatus;
+    private Direction currentDirection;
+    private double actionEndTime;
+
     public Elevator(int index, int currentFloor) {
         this.currentFloor = currentFloor;
         position = new Point2D.Double(index * 10, currentFloor * Tower.FLOOR_HEIGHT);
         destinationFloors = new LinkedList<>();
         actionQueue = new LinkedList<>();
+        currentStatus = Status.IDLE;
     }
 
     public Queue<Integer> getDestinationFloors() {
         return destinationFloors;
     }
 
-    public Integer nextDestination() {
-        return destinationFloors.peek();
-    }
-
-    public Action currentAction() {
-        return actionQueue.peek();
-    }
-
-    public void updateStatus(double deltaTime) {
+    private void updateStatus(double deltaTime) {
         currentFloor = (int) Math.round(position.y / Tower.FLOOR_HEIGHT);
 
-        if (actionQueue.isEmpty()) {
-            speed = 0d;
-            velocity = speed;
-            evaluateActions();
-        }
-        if (!actionQueue.isEmpty()) {
-            double currentTime = Simulation.getTick() / 1000d;
-            double endTime = currentAction().getEndTime() - (deltaTime * 4);
-            if (endTime > currentTime) {
-                Status currentStatus = currentAction().getStatus();
-                Direction direction = currentAction().getDirection();
-
-                switch (currentStatus) {
-                    case ACCELERATING -> {
-                        speed += ACCELERATION * deltaTime;
-                        speed = Math.min(speed, MAX_SPEED);
-                    }
-                    case BRAKING, STOPPED -> {
-                        speed -= ACCELERATION * deltaTime;
-                        speed = Math.max(speed, 0d);
-                    }
-                }
-                switch (direction) {
-                    case UP, NONE -> velocity = speed;
-                    case DOWN -> velocity = -speed;
-                }
-            } else {
-                Action lastAction = actionQueue.remove();
-                if (lastAction.getStatus() == Status.BRAKING) {
-                    System.out.println("Speed: " + speed);
+        double currentTime = Simulation.getTick() / 1000d;
+        if (actionEndTime <= currentTime) {
+            if (!actionQueue.isEmpty()) {
+                Action action = actionQueue.remove();
+                actionEndTime = currentTime + action.getDuration();
+                currentStatus = action.getStatus();
+                currentDirection = action.getDirection();
+                if (currentStatus == Status.STOPPED) {
+                    System.out.println("speed: " + speed);
                     System.out.println((int) (position.x / 10) + " Floor: " + currentFloor + " @elevation: " + String.format("%.14f", position.y));
                 }
+            } else {
+                speed = 0d;
+                velocity = speed;
+                evaluateActions();
+            }
+        } else {
+            switch (currentStatus) {
+                case ACCELERATING -> {
+                    speed += ACCELERATION * deltaTime;
+                    speed = Math.min(speed, MAX_SPEED);
+                }
+                case BRAKING, STOPPED -> {
+                    speed -= ACCELERATION * deltaTime;
+                    speed = Math.max(speed, 0d);
+                }
+            }
+            switch (currentDirection) {
+                case UP, NONE -> velocity = speed;
+                case DOWN -> velocity = -speed;
             }
         }
     }
 
-    public void evaluateActions() {
-        if (nextDestination() != null) {
+    private void evaluateActions() {
+        if (destinationFloors.peek() != null) {
             nextDestination = destinationFloors.remove();
             double displacement = nextDestination * Tower.FLOOR_HEIGHT - position.y;
             double distance = Math.abs(displacement);
@@ -93,25 +88,18 @@ public class Elevator implements SimObject {
                 direction = Direction.UP;
             }
 
-            double startTime = Simulation.getTick() / 1000d;
             if (distance > distanceToAccelerate * 2) {
-                double accelerationEndTime = startTime + timeToAccelerate;
-                actionQueue.add(new Action(accelerationEndTime, Status.ACCELERATING, direction));
-                double movingEndTime = accelerationEndTime + (distance - distanceToAccelerate * 2) / MAX_SPEED;
-                actionQueue.add(new Action(movingEndTime, Status.MOVING, direction));
-                double brakingEndTime = movingEndTime + timeToAccelerate;
-                actionQueue.add(new Action(brakingEndTime, Status.BRAKING, direction)); // evt. static Methods für die Actions?!
-                double waitingEndTime = brakingEndTime + WAITING_TIME;
-                actionQueue.add(new Action(waitingEndTime, Status.STOPPED, Direction.NONE)); // evt. endTime von vorheriger Action oder doch duration?!
+                actionQueue.add(new Action(timeToAccelerate, Status.ACCELERATING, direction));
+                actionQueue.add(new Action((distance - distanceToAccelerate * 2) / MAX_SPEED, Status.MOVING, direction));
+                actionQueue.add(new Action(timeToAccelerate, Status.BRAKING, direction)); // evt. static Methods für die Actions?!
             } else {
                 double halfTime = Math.sqrt(distance / ACCELERATION);
-                double accelerationEndTime = startTime + halfTime;
-                actionQueue.add(new Action(accelerationEndTime, Status.ACCELERATING, direction));
-                double brakingEndTime = accelerationEndTime + halfTime;
-                actionQueue.add(new Action(brakingEndTime, Status.BRAKING, direction));
-                double waitingEndTime = brakingEndTime + WAITING_TIME; // Mit duration bräuchten wir das nicht doppelt!
-                actionQueue.add(new Action(waitingEndTime, Status.STOPPED, Direction.NONE));
+                actionQueue.add(new Action(halfTime, Status.ACCELERATING, direction));
+                actionQueue.add(new Action(halfTime, Status.BRAKING, direction));
             }
+            actionQueue.add(new Action(WAITING_TIME, Status.STOPPED, Direction.NONE));
+        } else {
+            currentStatus = Status.IDLE;
         }
     }
 
