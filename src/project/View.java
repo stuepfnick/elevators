@@ -55,10 +55,10 @@ public class View {
         statusFrame = new JFrame("Status");
         statusFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         statusFrame.setMinimumSize(new Dimension(frame.getWidth(), 16 * simObjects.size()));
-        statusFrame.setMaximumSize(new Dimension(frame.getWidth() * 3, 25 * simObjects.size()));
-        statusFrame.setSize((int) (frame.getWidth() * 2.2),20 * simObjects.size());
-        statusFrame.setLayout(new GridLayout(TowerConstants.NUMBER_OF_ELEVATORS + 1, 1));
-        for (int i = 0; i < TowerConstants.NUMBER_OF_ELEVATORS + 1; i++) {
+        statusFrame.setMaximumSize(new Dimension(frame.getWidth() * 5, 25 * simObjects.size()));
+        statusFrame.setSize((int) (frame.getWidth() * 3),20 * simObjects.size());
+        statusFrame.setLayout(new GridLayout(simObjects.size(), 1));
+        for (int i = 0; i < simObjects.size(); i++) {
             JLabel label = new JLabel(String.valueOf(i));
             statusFrame.add(label);
             statusLabels.add(label);

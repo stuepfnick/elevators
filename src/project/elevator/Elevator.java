@@ -19,7 +19,7 @@ import static project.elevator.ElevatorConstants.*;
 public class Elevator implements SimObject {
     private final Point.Double position;
     private double speed, velocity;
-    private int currentFloor, nextDestination;
+    private int currentFloor, nextDestinationFloor;
     private final Queue<Integer> destinationFloors;
     private final Queue<Action> actionQueue;
 
@@ -56,7 +56,7 @@ public class Elevator implements SimObject {
             totalTime += actionQueue.stream()
                     .mapToDouble(Action::getDuration)
                     .sum();
-            int oldFloor = nextDestination;
+            int oldFloor = nextDestinationFloor;
             for (int nextFloor : destinationFloors) {
                 totalTime += calculateTravelTime(oldFloor, nextFloor) + WAITING_TIME;
                 oldFloor = nextFloor;
@@ -110,8 +110,8 @@ public class Elevator implements SimObject {
 
     private void evaluateActions() {
         if (destinationFloors.peek() != null) {
-            nextDestination = destinationFloors.remove();
-            double displacement = nextDestination * TowerConstants.FLOOR_HEIGHT - position.y;
+            nextDestinationFloor = destinationFloors.remove();
+            double displacement = nextDestinationFloor * TowerConstants.FLOOR_HEIGHT - position.y;
             double distance = Math.abs(displacement);
 
             Direction direction = Direction.NONE;
@@ -163,6 +163,6 @@ public class Elevator implements SimObject {
     public String getStatusText() {
         String status = String.valueOf(currentStatus);
         String direction = String.valueOf(currentDirection);
-        return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase(), currentFloor, Math.abs(position.y));
+        return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase() + " -> " + nextDestinationFloor + " " + destinationFloors, currentFloor, Math.abs(position.y));
     }
 }
