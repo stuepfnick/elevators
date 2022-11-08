@@ -19,7 +19,7 @@ import static project.elevator.ElevatorConstants.*;
 public class Elevator implements SimObject {
     private final Point.Double position;
     private double speed, velocity;
-    private int currentFloor;
+    private int currentFloor, nextDestination;
     private final Queue<Integer> destinationFloors;
     private final Queue<Action> actionQueue;
 
@@ -48,24 +48,20 @@ public class Elevator implements SimObject {
     }
 
     public double calculateTimeToFloor(int floor) {
-        double movingTime = calculateTravelTime(currentFloor, floor);
-
         if (currentStatus == Status.IDLE) {
-            return movingTime;
+            return calculateTravelTime(currentFloor, floor);
         } else {
             double actionRestTime = actionEndTime - Simulation.getTick() / 1000d;
-            double totalTime = actionRestTime > 0 ? actionRestTime : 0d;
+            double totalTime = Math.max(actionRestTime, 0d);
             totalTime += actionQueue.stream()
                     .mapToDouble(Action::getDuration)
                     .sum();
-            int oldFloor = currentFloor;
-            var floors = destinationFloors.stream().toList();
-            for (int i = 0; i < destinationFloors.size(); i++) {
-                int nextFloor = floors.get(i);
+            int oldFloor = nextDestination;
+            for (int nextFloor : destinationFloors) {
                 totalTime += calculateTravelTime(oldFloor, nextFloor) + WAITING_TIME;
                 oldFloor = nextFloor;
             }
-            return totalTime;
+            return totalTime + calculateTravelTime(oldFloor, floor);
         }
     }
 
@@ -114,7 +110,7 @@ public class Elevator implements SimObject {
 
     private void evaluateActions() {
         if (destinationFloors.peek() != null) {
-            int nextDestination = destinationFloors.remove();
+            nextDestination = destinationFloors.remove();
             double displacement = nextDestination * TowerConstants.FLOOR_HEIGHT - position.y;
             double distance = Math.abs(displacement);
 
@@ -130,7 +126,7 @@ public class Elevator implements SimObject {
             if (distance > DISTANCE_TO_ACCELERATE * 2) {
                 actionQueue.add(new Action(TIME_TO_ACCELERATE, Status.ACCELERATING, direction));
                 actionQueue.add(new Action((distance - DISTANCE_TO_ACCELERATE * 2) / MAX_SPEED, Status.MOVING, direction));
-                actionQueue.add(new Action(TIME_TO_ACCELERATE, Status.BRAKING, direction)); // evt. static Methods für die Actions?! elevators.project.elevator.Action.brake(timeToAccelerate, direction)
+                actionQueue.add(new Action(TIME_TO_ACCELERATE, Status.BRAKING, direction)); // evt. static Methods für die Actions?! Action.brake(timeToAccelerate, direction)
             } else {
                 double halfTime = Math.sqrt(distance / ACCELERATION);
                 actionQueue.add(new Action(halfTime, Status.ACCELERATING, direction));
