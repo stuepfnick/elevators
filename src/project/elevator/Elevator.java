@@ -17,8 +17,6 @@ import java.util.Queue;
 import static project.elevator.ElevatorConstants.*;
 
 public class Elevator implements SimObject {
-    private static final double distanceToAccelerate = (MAX_SPEED * MAX_SPEED) / (ACCELERATION * 2);
-    private static final double timeToAccelerate = MAX_SPEED / ACCELERATION;
     private final Point.Double position;
     private double speed, velocity;
     private int currentFloor;
@@ -42,8 +40,8 @@ public class Elevator implements SimObject {
 
     public static double calculateTravelTime(int floor1, int floor2) {
         double distance = Math.abs(floor2 * TowerConstants.FLOOR_HEIGHT - floor1 * TowerConstants.FLOOR_HEIGHT);
-        if (distance > distanceToAccelerate * 2) {
-            return  (distance - distanceToAccelerate * 2) / MAX_SPEED + timeToAccelerate * 2;
+        if (distance > DISTANCE_TO_ACCELERATE * 2) {
+            return  (distance - DISTANCE_TO_ACCELERATE * 2) / MAX_SPEED + TIME_TO_ACCELERATE * 2;
         } else {
             return Math.sqrt(distance / ACCELERATION) * 2;
         }
@@ -129,10 +127,10 @@ public class Elevator implements SimObject {
                 direction = Direction.UP;
             }
 
-            if (distance > distanceToAccelerate * 2) {
-                actionQueue.add(new Action(timeToAccelerate, Status.ACCELERATING, direction));
-                actionQueue.add(new Action((distance - distanceToAccelerate * 2) / MAX_SPEED, Status.MOVING, direction));
-                actionQueue.add(new Action(timeToAccelerate, Status.BRAKING, direction)); // evt. static Methods für die Actions?! elevators.project.elevator.Action.brake(timeToAccelerate, direction)
+            if (distance > DISTANCE_TO_ACCELERATE * 2) {
+                actionQueue.add(new Action(TIME_TO_ACCELERATE, Status.ACCELERATING, direction));
+                actionQueue.add(new Action((distance - DISTANCE_TO_ACCELERATE * 2) / MAX_SPEED, Status.MOVING, direction));
+                actionQueue.add(new Action(TIME_TO_ACCELERATE, Status.BRAKING, direction)); // evt. static Methods für die Actions?! elevators.project.elevator.Action.brake(timeToAccelerate, direction)
             } else {
                 double halfTime = Math.sqrt(distance / ACCELERATION);
                 actionQueue.add(new Action(halfTime, Status.ACCELERATING, direction));
