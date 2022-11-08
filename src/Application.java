@@ -2,13 +2,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 public class Application {
-    public static Tower tower;
-    public static void main(String[] args) {
-        tower = new Tower();
-        Simulation simulation = new Simulation(tower);
+    private final Simulation simulation;
+    public Application() {
+        simulation = new Simulation(new Tower());
         Thread t = new Thread(simulation);
         t.start();
 
+        askForInput();
+    }
+
+    public static void main(String[] args) {
+        new Application();
+    }
+
+    public void askForInput() {
         var elevators = simulation.getTower().getElevators();
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -47,9 +54,9 @@ public class Application {
                 System.out.println("Unknown command!");
             }
         }
-        //System.exit(0);
     }
-    private static void addRequest(String[] inputs) {
+
+    private void addRequest(String[] inputs) {
         if (inputs.length != 2) {
             System.out.println("You need to enter 2 floors for a request!");
             return;
@@ -64,6 +71,6 @@ public class Application {
                 System.out.println(value + " is no whole number!");
             }
         }
-        tower.addRequest(request.get(0), request.get(1));
+        simulation.getTower().addRequest(request.get(0), request.get(1));
     }
 }

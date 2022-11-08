@@ -16,7 +16,7 @@ public class Simulation implements Runnable {
     public Simulation(Tower tower) {
         this.tower = tower;
         view = new View();
-        view.getRenderObjects().addAll(tower.getElevators());
+        view.getSimObjects().addAll(tower.getElevators());
     }
 
     public Tower getTower() {
@@ -70,13 +70,13 @@ public class Simulation implements Runnable {
         double deltaTime = (currentTick - tickLastUpdate) / 1000d;
         tickLastUpdate = currentTick;
 
-        tower.getElevators().forEach(elevator -> elevator.update(deltaTime));
+        view.getSimObjects().forEach(elevator -> elevator.update(deltaTime));
 
         averageDeltaTime = (deltaTime + averageDeltaTime) / 2d;
     }
 
     public void fixedUpdate() {
-        tower.getElevators().forEach(Elevator::fixedUpdate);
+        view.getSimObjects().forEach(SimObject::fixedUpdate);
     }
 
     public void stop() {

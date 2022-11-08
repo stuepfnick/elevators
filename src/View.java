@@ -3,10 +3,9 @@ import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-public class View extends JFrame {
+public class View {
 
     final int WIDTH = (Tower.NUMBER_OF_ELEVATORS) * Simulation.ELEVATOR_SPACING_PIXEL;
     static final int HEIGHT = (Tower.NUMBER_OF_FLOORS + 1) * Simulation.FLOOR_HEIGHT_PIXEL;
@@ -15,6 +14,7 @@ public class View extends JFrame {
     private final List<JLabel> statusLabels = new ArrayList<>();
 
     private JFrame frame;
+    private JFrame statusFrame;
     private BufferStrategy bufferStrategy;
 
     BufferedImage background;
@@ -24,6 +24,7 @@ public class View extends JFrame {
     }
 
     private void createAndShowGUI() {
+        // Sim View
         frame = new JFrame("Simulation");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel panel = (JPanel) frame.getContentPane();
@@ -41,26 +42,27 @@ public class View extends JFrame {
         frame.setVisible(true);
         frame.pack();
 
-        canvas.createBufferStrategy(2);
-        bufferStrategy = canvas.getBufferStrategy();
+        background = new BufferedImage(WIDTH * 2, HEIGHT * 2, BufferedImage.TYPE_INT_ARGB);
+        drawBackground(background.createGraphics());
 
-        JFrame statusView = new JFrame("Status");
-        statusView.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        statusView.setSize((int) (frame.getWidth() * 2.2),20 * Tower.NUMBER_OF_ELEVATORS);
-        statusView.setMinimumSize(new Dimension(frame.getWidth(), 16 * Tower.NUMBER_OF_ELEVATORS));
-        statusView.setMaximumSize(new Dimension(frame.getWidth() * 3, 25 * Tower.NUMBER_OF_ELEVATORS));
-        statusView.setLayout(new GridLayout(Tower.NUMBER_OF_ELEVATORS, 1));
-        for (int i = 0; i < Tower.NUMBER_OF_ELEVATORS; i++) {
+        // Status View
+        statusFrame = new JFrame("Status");
+        statusFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        statusFrame.setMinimumSize(new Dimension(frame.getWidth(), 16 * simObjects.size()));
+        statusFrame.setMaximumSize(new Dimension(frame.getWidth() * 3, 25 * simObjects.size()));
+        statusFrame.setSize((int) (frame.getWidth() * 2.2),20 * simObjects.size());
+        statusFrame.setLayout(new GridLayout(Tower.NUMBER_OF_ELEVATORS + 1, 1));
+        for (int i = 0; i < Tower.NUMBER_OF_ELEVATORS + 1; i++) {
             JLabel label = new JLabel(String.valueOf(i));
-            statusView.add(label);
+            statusFrame.add(label);
             statusLabels.add(label);
         }
 
-        statusView.setLocation(0, frame.getHeight() + 24);
-        statusView.setVisible(true);
+        statusFrame.setLocation(0, frame.getHeight() + 24);
+        statusFrame.setVisible(true);
 
-        background = new BufferedImage(WIDTH * 2, HEIGHT * 2, BufferedImage.TYPE_INT_ARGB);
-        drawBackground(background.createGraphics());
+        canvas.createBufferStrategy(2);
+        bufferStrategy = canvas.getBufferStrategy();
     }
 
     public void render(float interpolation) {
@@ -70,7 +72,7 @@ public class View extends JFrame {
 
         setFontSize(g, 0.6f);
 
-        for (int i = 0; i < Tower.NUMBER_OF_ELEVATORS; i++) {
+        for (int i = 0; i < simObjects.size(); i++) {
             var simObject = simObjects.get(i);
             simObject.render(g, interpolation);
             statusLabels.get(i).setText(i + ": " + simObject.getStatusText());
@@ -98,11 +100,12 @@ public class View extends JFrame {
         g.setFont(newFont);
     }
 
-    public Collection<SimObject> getRenderObjects() {
+    public List<SimObject> getSimObjects() {
         return simObjects;
     }
 
     public void close() {
         frame.dispose();
+        statusFrame.dispose();
     }
 }
