@@ -1,3 +1,8 @@
+package project.elevator;
+
+import project.enums.Direction;
+import project.enums.Status;
+
 public class Action {
     private final double duration;
     private final Status status;
@@ -21,12 +26,4 @@ public class Action {
         return direction;
     }
 
-    @Override
-    public String toString() {
-        return "Action{" +
-                "endTime=" + duration +
-                ", status=" + status +
-                ", direction=" + direction +
-                '}';
-    }
 }

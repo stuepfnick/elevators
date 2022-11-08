@@ -1,3 +1,5 @@
+package project.simulation;
+
 import java.awt.*;
 
 public interface SimObject {

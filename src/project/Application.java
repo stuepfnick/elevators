@@ -1,3 +1,9 @@
+package project;
+
+import project.Tower.Tower;
+import project.Tower.TowerConstants;
+import project.simulation.Simulation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -38,17 +44,17 @@ public class Application {
                 for (String value : inputs) {
                     try {
                         int number = Integer.parseInt(value);
-                        number = Math.max(Math.min(number, Tower.NUMBER_OF_FLOORS), 0);
+                        number = Math.max(Math.min(number, TowerConstants.NUMBER_OF_FLOORS), 0);
                         newDestinations.add(number);
                     } catch (NumberFormatException e) {
                         System.out.println(value + " is no whole number!");
                     }
                 }
                 int index = newDestinations.remove(0);
-                if (index >= 0 && index < Tower.NUMBER_OF_ELEVATORS) {
+                if (index >= 0 && index < TowerConstants.NUMBER_OF_ELEVATORS) {
                     elevators.get(index).addDestinationFloors(newDestinations);
                 } else {
-                    System.out.println("There is no elevator " + index);
+                    System.out.println("There is no elevators.project.elevator " + index);
                 }
             } else {
                 System.out.println("Unknown command!");
@@ -65,7 +71,7 @@ public class Application {
         for (String value : inputs) {
             try {
                 int number = Integer.parseInt(value);
-                number = Math.max(Math.min(number, Tower.NUMBER_OF_FLOORS), 0);
+                number = Math.max(Math.min(number, TowerConstants.NUMBER_OF_FLOORS), 0);
                 request.add(number);
             } catch (NumberFormatException e) {
                 System.out.println(value + " is no whole number!");

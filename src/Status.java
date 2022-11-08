@@ -1,3 +1,0 @@
-public enum Status {
-    IDLE, ACCELERATING, MOVING, BRAKING, WAITING
-}

@@ -1,20 +1,22 @@
+package project.elevator;
+
+import project.Tower.TowerConstants;
+import project.View;
+import project.enums.Direction;
+import project.enums.Status;
+import project.simulation.SimObject;
+import project.simulation.Simulation;
+import project.simulation.SimulationConstants;
+
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import static project.elevator.ElevatorConstants.*;
+
 public class Elevator implements SimObject {
-
-    // Constants for ALL elevators
-    public static final double MAX_SPEED = 8.0;    // m/s
-    public static final double ACCELERATION = 1.5; // m/s^2
-    private static final double MAX_DELTA = 0.01;
-    private static final double WAITING_TIME = 10;
-
-    private static final int PIXEL_WIDTH = 10;
-    private static final int PIXEL_HEIGHT = 10;
-
     private static final double distanceToAccelerate = (MAX_SPEED * MAX_SPEED) / (ACCELERATION * 2);
     private static final double timeToAccelerate = MAX_SPEED / ACCELERATION;
     private final Point.Double position;
@@ -25,12 +27,13 @@ public class Elevator implements SimObject {
 
     // current Action has different time then queued Actions
     private double actionEndTime;
+
     private Status currentStatus;
     private Direction currentDirection;
 
     public Elevator(int index, int currentFloor) {
         this.currentFloor = currentFloor;
-        position = new Point2D.Double(index * Simulation.ELEVATOR_SPACING_PIXEL + 1, currentFloor * Tower.FLOOR_HEIGHT);
+        position = new Point2D.Double(index * SimulationConstants.ELEVATOR_SPACING_PIXEL + 1, currentFloor * TowerConstants.FLOOR_HEIGHT);
         destinationFloors = new LinkedList<>();
         actionQueue = new LinkedList<>();
         currentStatus = Status.IDLE;
@@ -38,9 +41,8 @@ public class Elevator implements SimObject {
     }
 
     public static double calculateTravelTime(int floor1, int floor2) {
-        double displacement = floor1 * Tower.FLOOR_HEIGHT - floor2 * Tower.FLOOR_HEIGHT;
-        double distance = Math.abs(displacement);
-        if (distance > timeToAccelerate * 2) {
+        double distance = Math.abs(floor2 * TowerConstants.FLOOR_HEIGHT - floor1 * TowerConstants.FLOOR_HEIGHT);
+        if (distance > distanceToAccelerate * 2) {
             return  (distance - distanceToAccelerate * 2) / MAX_SPEED + timeToAccelerate * 2;
         } else {
             return Math.sqrt(distance / ACCELERATION) * 2;
@@ -80,7 +82,7 @@ public class Elevator implements SimObject {
     }
 
     private void updateStatus(double deltaTime) {
-        currentFloor = (int) Math.round(position.y / Tower.FLOOR_HEIGHT);
+        currentFloor = (int) Math.round(position.y / TowerConstants.FLOOR_HEIGHT);
 
         double currentTime = Simulation.getTick() / 1000d;
         if (actionEndTime <= currentTime) {
@@ -115,7 +117,7 @@ public class Elevator implements SimObject {
     private void evaluateActions() {
         if (destinationFloors.peek() != null) {
             int nextDestination = destinationFloors.remove();
-            double displacement = nextDestination * Tower.FLOOR_HEIGHT - position.y;
+            double displacement = nextDestination * TowerConstants.FLOOR_HEIGHT - position.y;
             double distance = Math.abs(displacement);
 
             Direction direction = Direction.NONE;
@@ -130,7 +132,7 @@ public class Elevator implements SimObject {
             if (distance > distanceToAccelerate * 2) {
                 actionQueue.add(new Action(timeToAccelerate, Status.ACCELERATING, direction));
                 actionQueue.add(new Action((distance - distanceToAccelerate * 2) / MAX_SPEED, Status.MOVING, direction));
-                actionQueue.add(new Action(timeToAccelerate, Status.BRAKING, direction)); // evt. static Methods für die Actions?! Action.brake(timeToAccelerate, direction)
+                actionQueue.add(new Action(timeToAccelerate, Status.BRAKING, direction)); // evt. static Methods für die Actions?! elevators.project.elevator.Action.brake(timeToAccelerate, direction)
             } else {
                 double halfTime = Math.sqrt(distance / ACCELERATION);
                 actionQueue.add(new Action(halfTime, Status.ACCELERATING, direction));
@@ -144,7 +146,7 @@ public class Elevator implements SimObject {
 
     @Override
     public void fixedUpdate() {
-        position.y += velocity * Simulation.FIXED_DELTA_TIME;
+        position.y += velocity * SimulationConstants.FIXED_DELTA_TIME;
     }
 
     @Override
@@ -154,8 +156,8 @@ public class Elevator implements SimObject {
 
     @Override
     public void render(Graphics2D g, float interpolation) {
-        double displayElevation = position.y + velocity * interpolation * Simulation.FIXED_DELTA_TIME;
-        Point pixelPos = new Point((int) position.x, View.HEIGHT - (int) Math.round(displayElevation / Tower.FLOOR_HEIGHT * Simulation.FLOOR_HEIGHT_PIXEL) - Simulation.ELEVATOR_SPACING_PIXEL + 2);
+        double displayElevation = position.y + velocity * interpolation * SimulationConstants.FIXED_DELTA_TIME;
+        Point pixelPos = new Point((int) position.x, View.HEIGHT - (int) Math.round(displayElevation / TowerConstants.FLOOR_HEIGHT * SimulationConstants.FLOOR_HEIGHT_PIXEL) - SimulationConstants.ELEVATOR_SPACING_PIXEL + 2);
         g.setColor(Color.BLACK);
         g.fillRect(pixelPos.x, pixelPos.y, PIXEL_WIDTH, PIXEL_HEIGHT);
         g.setColor(Color.ORANGE);

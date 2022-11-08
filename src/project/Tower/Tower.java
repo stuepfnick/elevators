@@ -1,10 +1,13 @@
+package project.Tower;
+
+import project.elevator.Elevator;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import static project.Tower.TowerConstants.*;
+
 public class Tower {
-    public static final double FLOOR_HEIGHT = 4.0; // m
-    public static final int NUMBER_OF_ELEVATORS = 7;
-    public static final int NUMBER_OF_FLOORS = 55;
     private final List<Elevator> elevators;
 
     public Tower() {

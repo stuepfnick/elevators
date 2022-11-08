@@ -1,3 +1,9 @@
+package project;
+
+import project.Tower.TowerConstants;
+import project.simulation.SimObject;
+import project.simulation.SimulationConstants;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
@@ -7,8 +13,8 @@ import java.util.List;
 
 public class View {
 
-    final int WIDTH = (Tower.NUMBER_OF_ELEVATORS) * Simulation.ELEVATOR_SPACING_PIXEL;
-    static final int HEIGHT = (Tower.NUMBER_OF_FLOORS + 1) * Simulation.FLOOR_HEIGHT_PIXEL;
+    final int WIDTH = (TowerConstants.NUMBER_OF_ELEVATORS) * SimulationConstants.ELEVATOR_SPACING_PIXEL;
+    public static final int HEIGHT = (TowerConstants.NUMBER_OF_FLOORS + 1) * SimulationConstants.FLOOR_HEIGHT_PIXEL;
 
     private final List<SimObject> simObjects = new ArrayList<>();
     private final List<JLabel> statusLabels = new ArrayList<>();
@@ -51,8 +57,8 @@ public class View {
         statusFrame.setMinimumSize(new Dimension(frame.getWidth(), 16 * simObjects.size()));
         statusFrame.setMaximumSize(new Dimension(frame.getWidth() * 3, 25 * simObjects.size()));
         statusFrame.setSize((int) (frame.getWidth() * 2.2),20 * simObjects.size());
-        statusFrame.setLayout(new GridLayout(Tower.NUMBER_OF_ELEVATORS + 1, 1));
-        for (int i = 0; i < Tower.NUMBER_OF_ELEVATORS + 1; i++) {
+        statusFrame.setLayout(new GridLayout(TowerConstants.NUMBER_OF_ELEVATORS + 1, 1));
+        for (int i = 0; i < TowerConstants.NUMBER_OF_ELEVATORS + 1; i++) {
             JLabel label = new JLabel(String.valueOf(i));
             statusFrame.add(label);
             statusLabels.add(label);
@@ -87,8 +93,8 @@ public class View {
         g.clearRect(0, 0, WIDTH * 2, HEIGHT * 2);
         g.setColor(Color.BLUE);
         setFontSize(g, 1.5f);
-        for (int i = 0; i < Tower.NUMBER_OF_FLOORS + 2; i++) {
-            int lineY = Simulation.FLOOR_HEIGHT_PIXEL * i * 2;
+        for (int i = 0; i < TowerConstants.NUMBER_OF_FLOORS + 2; i++) {
+            int lineY = SimulationConstants.FLOOR_HEIGHT_PIXEL * i * 2;
             g.drawLine(0, lineY, WIDTH * 2, lineY);
             g.drawString(String.valueOf(56 - i), 0, lineY - 2);
         }
