@@ -25,7 +25,6 @@ public class Elevator implements SimObject {
 
     // current Action has different time then queued Actions
     private double actionEndTime;
-
     private Status currentStatus;
     private Direction currentDirection;
 
@@ -48,7 +47,7 @@ public class Elevator implements SimObject {
     }
 
     public double calculateTimeToFloor(int floor) {
-        if (currentStatus == Status.IDLE) {
+        if (currentStatus == Status.IDLE && destinationFloors.size() == 0) {
             return calculateTravelTime(currentFloor, floor);
         } else {
             double actionRestTime = actionEndTime - Simulation.getTick() / 1000d;
@@ -66,7 +65,10 @@ public class Elevator implements SimObject {
     }
 
     public void addDestinationFloor(int floor) {
-        destinationFloors.add(floor);
+        Integer lastFloor = destinationFloors.stream().reduce((prev, next) -> next).orElse(null);
+        if (lastFloor == null || lastFloor != floor) {
+            destinationFloors.add(floor);
+        }
     }
 
     public void addDestinationFloors(List<Integer> floors) {
@@ -163,6 +165,10 @@ public class Elevator implements SimObject {
     public String getStatusText() {
         String status = String.valueOf(currentStatus);
         String direction = String.valueOf(currentDirection);
-        return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase() + " -> " + nextDestinationFloor + " " + destinationFloors, currentFloor, Math.abs(position.y));
+        try {
+            return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase() + " -> " + nextDestinationFloor + " " + destinationFloors, currentFloor, Math.abs(position.y));
+        } catch (NullPointerException ignored) {
+            return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase() + " -> " + nextDestinationFloor, currentFloor, Math.abs(position.y));
+        }
     }
 }

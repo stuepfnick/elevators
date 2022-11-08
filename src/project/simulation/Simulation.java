@@ -18,6 +18,7 @@ public class Simulation implements Runnable {
     public Simulation(Tower tower) {
         this.tower = tower;
         view = new View();
+        view.getSimObjects().add(tower);
         view.getSimObjects().addAll(tower.getElevators());
     }
 

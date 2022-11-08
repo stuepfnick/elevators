@@ -4,9 +4,8 @@ import project.Tower.Tower;
 import project.Tower.TowerConstants;
 import project.simulation.Simulation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+
 public class Application {
     private final Simulation simulation;
     public Application() {
@@ -24,6 +23,7 @@ public class Application {
     public void askForInput() {
         var elevators = simulation.getTower().getElevators();
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Available commands: 'addRandomRequest' (short 'arr') or 'addRequest #FROM #TO' (short 'ar')");
         while (true) {
             System.out.println("command:");
             String input = scanner.nextLine();
@@ -32,51 +32,61 @@ public class Application {
                 simulation.stop();
                 break;
             }
-            if (input.toLowerCase().startsWith("addrequest")) {
-                String[] inputs = input.substring(11).split("\\s");
-                addRequest(inputs);
-            } else if (input.toLowerCase().startsWith("ar")) {
-                String[] inputs = input.substring(3).split("\\s");
-                addRequest(inputs);
-            } else if (input.toLowerCase().startsWith("add")) {
-                String[] inputs = input.substring(4).split("\\s");
-                List<Integer> newDestinations = new ArrayList<>();
-                for (String value : inputs) {
+            if (input.equalsIgnoreCase("arr") || input.equalsIgnoreCase("addRandomRequest")) {
+                addRandomRequest();
+
+            } else if (input.toLowerCase().startsWith("arr") || input.toLowerCase().startsWith("addrandomrequest")) {
+                List<String> inputs = new LinkedList<>(List.of(input.split("\\s")));
+                inputs.remove(0);
+                if (inputs.size() != 1) {
+                    System.out.println("This command needs 1 parameter!");
+                } else {
+                    String s = inputs.get(0);
                     try {
-                        int number = Integer.parseInt(value);
-                        number = Math.max(Math.min(number, TowerConstants.NUMBER_OF_FLOORS), 0);
-                        newDestinations.add(number);
+                        for (int i = 0; i < Integer.parseInt(s); i++) {
+                            addRandomRequest();
+                        }
                     } catch (NumberFormatException e) {
-                        System.out.println(value + " is no whole number!");
+                        System.out.println(s + " is no whole number!");
                     }
                 }
-                int index = newDestinations.remove(0);
-                if (index >= 0 && index < TowerConstants.NUMBER_OF_ELEVATORS) {
-                    elevators.get(index).addDestinationFloors(newDestinations);
-                } else {
-                    System.out.println("There is no elevators.project.elevator " + index);
-                }
+
+            } else if (input.toLowerCase().startsWith("addrequest") || input.toLowerCase().startsWith("ar")) {
+                List<String> inputs = new LinkedList<>(List.of(input.split("\\s")));
+                inputs.remove(0);
+                addRequest(inputs);
+
             } else {
                 System.out.println("Unknown command!");
             }
         }
     }
 
-    private void addRequest(String[] inputs) {
-        if (inputs.length != 2) {
+    private void addRandomRequest() {
+        Random random = new Random();
+        int randomFloor = random.nextInt(TowerConstants.NUMBER_OF_FLOORS + 1);
+        if (random.nextBoolean()) {
+            simulation.getTower().addRequest(0, randomFloor);
+        } else {
+            simulation.getTower().addRequest(randomFloor, 0);
+        }
+    }
+
+    private void addRequest(List<String> inputs) {
+        if (inputs.size() != 2) {
             System.out.println("You need to enter 2 floors for a request!");
             return;
         }
-        List<Integer> request = new ArrayList<>();
+        List<Integer> numbers = new ArrayList<>();
         for (String value : inputs) {
             try {
                 int number = Integer.parseInt(value);
                 number = Math.max(Math.min(number, TowerConstants.NUMBER_OF_FLOORS), 0);
-                request.add(number);
+                numbers.add(number);
             } catch (NumberFormatException e) {
                 System.out.println(value + " is no whole number!");
             }
         }
-        simulation.getTower().addRequest(request.get(0), request.get(1));
+        simulation.getTower().addRequest(numbers.get(0), numbers.get(1));
     }
 }
