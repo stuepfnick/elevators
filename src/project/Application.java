@@ -23,7 +23,7 @@ public class Application {
     public void askForInput() {
         var elevators = simulation.getTower().getElevators();
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Available commands: 'addRandomRequest' (short 'arr') or 'addRequest #FROM #TO' (short 'ar')");
+        System.out.println("Available commands: 'addRequest #FROM #TO' (short 'ar') or 'addRandomRequest' (short 'arr')");
         while (true) {
             System.out.println("command:");
             String input = scanner.nextLine();
@@ -43,7 +43,12 @@ public class Application {
                 } else {
                     String s = inputs.get(0);
                     try {
-                        for (int i = 0; i < Integer.parseInt(s); i++) {
+                        int numberOfRequests = Integer.parseInt(s);
+                        if (numberOfRequests > 12) {
+                            System.out.println("Limited to 12 random requests at once.");
+                            continue;
+                        }
+                        for (int i = 0; i < numberOfRequests; i++) {
                             addRandomRequest();
                         }
                     } catch (NumberFormatException e) {
@@ -81,7 +86,10 @@ public class Application {
         for (String value : inputs) {
             try {
                 int number = Integer.parseInt(value);
-                number = Math.max(Math.min(number, TowerConstants.NUMBER_OF_FLOORS), 0);
+                if (number > TowerConstants.NUMBER_OF_FLOORS || number < 0) {
+                    System.out.println(number + " is not a valid floor number");
+                    return;
+                }
                 numbers.add(number);
             } catch (NumberFormatException e) {
                 System.out.println(value + " is no whole number!");
