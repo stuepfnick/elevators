@@ -1,6 +1,6 @@
 package project;
 
-import project.Tower.TowerConstants;
+import project.tower.TowerConstants;
 import project.simulation.SimObject;
 import project.simulation.SimulationConstants;
 
@@ -35,6 +35,7 @@ public class View {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel panel = (JPanel) frame.getContentPane();
 
+        panel.setSize(WIDTH, HEIGHT);
         panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
         Canvas canvas = new Canvas();
@@ -54,9 +55,9 @@ public class View {
         // Status View
         statusFrame = new JFrame("Status");
         statusFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        statusFrame.setMinimumSize(new Dimension(frame.getWidth(), 16 * simObjects.size()));
-        statusFrame.setMaximumSize(new Dimension(frame.getWidth() * 5, 25 * simObjects.size()));
-        statusFrame.setSize((int) (frame.getWidth() * 3),20 * simObjects.size());
+        statusFrame.setMinimumSize(new Dimension(frame.getWidth(), 18 * simObjects.size()));
+        statusFrame.setMaximumSize(new Dimension(frame.getWidth() * 6, 24 * simObjects.size()));
+        statusFrame.setSize((frame.getWidth() * 4),20 * simObjects.size());
         statusFrame.setLayout(new GridLayout(simObjects.size(), 1));
         for (int i = 0; i < simObjects.size(); i++) {
             JLabel label = new JLabel(String.valueOf(i));
@@ -81,7 +82,7 @@ public class View {
         for (int i = 0; i < simObjects.size(); i++) {
             var simObject = simObjects.get(i);
             simObject.render(g, interpolation);
-            statusLabels.get(i).setText(i + ": " + simObject.getStatusText());
+            statusLabels.get(i).setText((i + 1) + ": " + simObject.getStatusText());
         }
 
         g.dispose();

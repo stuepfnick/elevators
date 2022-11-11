@@ -1,5 +1,5 @@
 package project.enums;
 
 public enum Status {
-    IDLE, ACCELERATING, MOVING, BRAKING, WAITING;
+    IDLE, ACCELERATING, MOVING, DECELERATING, WAITING;
 }

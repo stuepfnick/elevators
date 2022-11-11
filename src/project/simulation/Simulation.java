@@ -1,6 +1,6 @@
 package project.simulation;
 
-import project.Tower.Tower;
+import project.tower.Tower;
 import project.View;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,7 +18,6 @@ public class Simulation implements Runnable {
     public Simulation(Tower tower) {
         this.tower = tower;
         view = new View();
-        view.getSimObjects().add(tower);
         view.getSimObjects().addAll(tower.getElevators());
     }
 
@@ -73,6 +72,7 @@ public class Simulation implements Runnable {
         double deltaTime = (currentTick - tickLastUpdate) / 1000d;
         tickLastUpdate = currentTick;
 
+        tower.update(deltaTime);
         view.getSimObjects().forEach(elevator -> elevator.update(deltaTime));
 
         averageDeltaTime = (deltaTime + averageDeltaTime) / 2d;

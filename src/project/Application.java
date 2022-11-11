@@ -1,7 +1,7 @@
 package project;
 
-import project.Tower.Tower;
-import project.Tower.TowerConstants;
+import project.tower.Tower;
+import project.tower.TowerConstants;
 import project.simulation.Simulation;
 
 import java.util.*;

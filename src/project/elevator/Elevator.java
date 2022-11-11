@@ -1,6 +1,6 @@
 package project.elevator;
 
-import project.Tower.TowerConstants;
+import project.tower.TowerConstants;
 import project.View;
 import project.enums.Direction;
 import project.enums.Status;
@@ -9,9 +9,7 @@ import project.simulation.Simulation;
 import project.simulation.SimulationConstants;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 import static project.elevator.ElevatorConstants.*;
@@ -19,8 +17,8 @@ import static project.elevator.ElevatorConstants.*;
 public class Elevator implements SimObject {
     private final Point.Double position;
     private double speed, velocity;
-    private int currentFloor, nextDestinationFloor;
-    private final Queue<Integer> destinationFloors;
+    private int currentFloor, nextDestinationFloor, numberOfPassengers;
+    private final Queue<Request> requestQueue;
     private final Queue<Action> actionQueue;
 
     // current Action has different time then queued Actions
@@ -30,50 +28,56 @@ public class Elevator implements SimObject {
 
     public Elevator(int index, int currentFloor) {
         this.currentFloor = currentFloor;
-        position = new Point2D.Double(index * SimulationConstants.ELEVATOR_SPACING_PIXEL + 1, currentFloor * TowerConstants.FLOOR_HEIGHT);
-        destinationFloors = new LinkedList<>();
+        nextDestinationFloor = currentFloor;
+        position = new Point.Double((index * SimulationConstants.ELEVATOR_SPACING_PIXEL) + (SimulationConstants.ELEVATOR_SPACING_PIXEL - PIXEL_HEIGHT) / 2.0, currentFloor * TowerConstants.FLOOR_HEIGHT);
+        requestQueue = new LinkedList<>();
         actionQueue = new LinkedList<>();
         currentStatus = Status.IDLE;
         currentDirection = Direction.NONE;
     }
 
     public static double calculateTravelTime(int floor1, int floor2) {
-        double distance = Math.abs(floor2 * TowerConstants.FLOOR_HEIGHT - floor1 * TowerConstants.FLOOR_HEIGHT);
+        double distance = Math.abs((floor2 - floor1) * TowerConstants.FLOOR_HEIGHT);
         if (distance > DISTANCE_TO_ACCELERATE * 2) {
-            return  (distance - DISTANCE_TO_ACCELERATE * 2) / MAX_SPEED + TIME_TO_ACCELERATE * 2;
-        } else {
-            return Math.sqrt(distance / ACCELERATION) * 2;
+            return (distance - DISTANCE_TO_ACCELERATE * 2) / MAX_SPEED + TIME_TO_ACCELERATE * 2;
         }
+        return Math.sqrt(distance / ACCELERATION) * 2;
+    }
+
+    public static double calculateTravelAndWaitingTime(int floor1, int floor2) {
+        return floor1 == floor2 ? 0d : calculateTravelTime(floor1, floor2) + WAITING_TIME;
     }
 
     public double calculateTimeToFloor(int floor) {
-        if (currentStatus == Status.IDLE && destinationFloors.size() == 0) {
-            return calculateTravelTime(currentFloor, floor);
-        } else {
-            double actionRestTime = actionEndTime - Simulation.getTick() / 1000d;
-            double totalTime = Math.max(actionRestTime, 0d);
-            totalTime += actionQueue.stream()
-                    .mapToDouble(Action::getDuration)
-                    .sum();
-            int oldFloor = nextDestinationFloor;
-            for (int nextFloor : destinationFloors) {
-                totalTime += calculateTravelTime(oldFloor, nextFloor) + WAITING_TIME;
-                oldFloor = nextFloor;
-            }
-            return totalTime + calculateTravelTime(oldFloor, floor);
+        double remainingActionTime = actionEndTime - Simulation.getTick() / 1000d;
+        double totalTime = Math.max(remainingActionTime, 0d);
+        totalTime += actionQueue.stream() // time for remaining Actions
+                .mapToDouble(Action::getDuration)
+                .sum();
+        int oldFloor = nextDestinationFloor;
+        for (var request : requestQueue) { // time for remaining Requests
+            totalTime += calculateTravelAndWaitingTime(oldFloor, request.getOriginFloor());
+            totalTime += calculateTravelAndWaitingTime(request.getOriginFloor(), request.getDestinationFloor());
+            oldFloor = request.getDestinationFloor();
         }
+        return totalTime + calculateTravelAndWaitingTime(oldFloor, floor); // time to requested floor
     }
 
-    public void addDestinationFloor(int floor) {
-        Integer lastFloor = destinationFloors.stream().reduce((prev, next) -> next).orElse(null);
-        if (lastFloor == null || lastFloor != floor) {
-            destinationFloors.add(floor);
-        }
+    public boolean tryAddPassenger(Request request) {
+        return requestQueue.stream()
+                .filter(r -> r.equals(request) && r.getNumberOfPassengers() < CAPACITY) // if request is in queue and under capacity
+                .findFirst()
+                .map(r -> {
+                    r.addPassenger();   // add passenger
+                    return true;
+                }).orElse(false);
     }
 
-    public void addDestinationFloors(List<Integer> floors) {
-        for (int floor : floors) {
-            addDestinationFloor(floor);
+    public void addRequest(Request request) {
+        requestQueue.add(request);
+        if (request.getOriginFloor() == currentFloor && currentStatus == Status.IDLE) {
+            actionEndTime = Simulation.getTick() / 1000d + WAITING_TIME;
+            currentStatus = Status.WAITING;
         }
     }
 
@@ -90,6 +94,7 @@ public class Elevator implements SimObject {
             } else {
                 speed = 0d;
                 velocity = speed;
+                currentStatus = Status.IDLE;
                 evaluateActions();
             }
         } else {
@@ -98,7 +103,7 @@ public class Elevator implements SimObject {
                     speed += ACCELERATION * deltaTime;
                     speed = Math.min(speed, MAX_SPEED);
                 }
-                case BRAKING, WAITING -> {
+                case DECELERATING, WAITING -> {
                     speed -= ACCELERATION * deltaTime;
                     speed = Math.max(speed, 0d);
                 }
@@ -111,13 +116,20 @@ public class Elevator implements SimObject {
     }
 
     private void evaluateActions() {
-        if (destinationFloors.peek() != null) {
-            nextDestinationFloor = destinationFloors.remove();
+        if (requestQueue.peek() != null) {
+            if (requestQueue.peek().getOriginFloor() == currentFloor && currentStatus == Status.IDLE) {
+                Request request = requestQueue.remove();
+                nextDestinationFloor = request.getDestinationFloor();
+                numberOfPassengers = request.getNumberOfPassengers();
+            } else {
+                nextDestinationFloor = requestQueue.peek().getOriginFloor();
+                numberOfPassengers = 0;
+            }
             double displacement = nextDestinationFloor * TowerConstants.FLOOR_HEIGHT - position.y;
             double distance = Math.abs(displacement);
 
             Direction direction = Direction.NONE;
-            if (distance < MAX_DELTA) {
+            if (distance < MAX_DELTA) { // ???
                 return;
             } else if (displacement < 0) {
                 direction = Direction.DOWN;
@@ -128,15 +140,16 @@ public class Elevator implements SimObject {
             if (distance > DISTANCE_TO_ACCELERATE * 2) {
                 actionQueue.add(new Action(TIME_TO_ACCELERATE, Status.ACCELERATING, direction));
                 actionQueue.add(new Action((distance - DISTANCE_TO_ACCELERATE * 2) / MAX_SPEED, Status.MOVING, direction));
-                actionQueue.add(new Action(TIME_TO_ACCELERATE, Status.BRAKING, direction)); // evt. static Methods für die Actions?! Action.brake(timeToAccelerate, direction)
+                actionQueue.add(new Action(TIME_TO_ACCELERATE, Status.DECELERATING, direction)); // evt. static Methods für die Actions?! Action.brake(timeToAccelerate, direction)
             } else {
                 double halfTime = Math.sqrt(distance / ACCELERATION);
                 actionQueue.add(new Action(halfTime, Status.ACCELERATING, direction));
-                actionQueue.add(new Action(halfTime, Status.BRAKING, direction));
+                actionQueue.add(new Action(halfTime, Status.DECELERATING, direction));
             }
             actionQueue.add(new Action(WAITING_TIME, Status.WAITING, Direction.NONE));
         } else {
             currentStatus = Status.IDLE;
+            numberOfPassengers = 0;
         }
     }
 
@@ -153,7 +166,7 @@ public class Elevator implements SimObject {
     @Override
     public void render(Graphics2D g, float interpolation) {
         double displayElevation = position.y + velocity * interpolation * SimulationConstants.FIXED_DELTA_TIME;
-        Point pixelPos = new Point((int) position.x, View.HEIGHT - (int) Math.round(displayElevation / TowerConstants.FLOOR_HEIGHT * SimulationConstants.FLOOR_HEIGHT_PIXEL) - SimulationConstants.ELEVATOR_SPACING_PIXEL + 2);
+        Point pixelPos = new Point((int) position.x, View.HEIGHT - (int) Math.round(displayElevation / TowerConstants.FLOOR_HEIGHT * SimulationConstants.FLOOR_HEIGHT_PIXEL) - SimulationConstants.FLOOR_HEIGHT_PIXEL + (SimulationConstants.FLOOR_HEIGHT_PIXEL - PIXEL_HEIGHT));
         g.setColor(Color.BLACK);
         g.fillRect(pixelPos.x, pixelPos.y, PIXEL_WIDTH, PIXEL_HEIGHT);
         g.setColor(Color.ORANGE);
@@ -166,9 +179,9 @@ public class Elevator implements SimObject {
         String status = String.valueOf(currentStatus);
         String direction = String.valueOf(currentDirection);
         try {
-            return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase() + " -> " + nextDestinationFloor + " " + destinationFloors, currentFloor, Math.abs(position.y));
+            return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase() + " -> " + nextDestinationFloor + " (" + numberOfPassengers + ") " + requestQueue, currentFloor, Math.abs(position.y));
         } catch (NullPointerException ignored) {
-            return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase() + " -> " + nextDestinationFloor, currentFloor, Math.abs(position.y));
+            return String.format("%d - %.2fm " + status.toLowerCase() + " " + direction.toLowerCase() + " -> " + nextDestinationFloor + " (" + numberOfPassengers + ") ", currentFloor, Math.abs(position.y));
         }
     }
 }
