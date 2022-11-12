@@ -5,8 +5,9 @@ It has a floor 0 (ground floor) plus 55 floors and now also calculates passanger
 <p>
 Written 100% in Java and it uses Swing GUI for the display of the simulation.
 <p>
-Simply clone the repo, run it and enter the commands in the console (it will show possible commands after start), see resultes in Swing windows.
-
+Simply clone the repo*, run it and enter the commands in the console (it will show possible commands after start), see resultes in Swing windows.<br>
+*(for ElevatorTest you need to add JUnit (5) to project library, or if you just want run it, delete "ElevatorTest.java" after cloning)
+  
 **Screenshot:**<br>
 <img src="elevators_screenshot.jpg" width="538">
 
