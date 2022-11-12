@@ -27,7 +27,7 @@ public class Simulation implements Runnable {
 
     @Override
     public void run() {
-        averageDeltaTime = 0.016d; // Some start value that will get more accurate over time
+        averageDeltaTime = 0.001d; // Some start value that will get more accurate over time
         double startTime = getTick();
         tickLastUpdate = startTime;
         double skipUpdateTicks = 1000d / UPDATES_PER_SECOND;
@@ -41,16 +41,15 @@ public class Simulation implements Runnable {
             int MAX_FRAME_SKIP = 5;
             while (getTick() > nextGameTick && loops < MAX_FRAME_SKIP) {
                 fixedUpdate();
-
                 nextGameTick += skipUpdateTicks;
                 loops++;
             }
-
             update();
+
             if (getTick() >= nextFrameTick) {
+                nextFrameTick = getTick() + skipFrameTicks;
                 float interpolation = (float) (getTick() + skipUpdateTicks - nextGameTick) / (float) skipUpdateTicks;
                 render(interpolation);
-                nextFrameTick = getTick() + skipFrameTicks;
             }
         }
 
@@ -71,11 +70,10 @@ public class Simulation implements Runnable {
         double currentTick = getTick();
         double deltaTime = (currentTick - tickLastUpdate) / 1000d;
         tickLastUpdate = currentTick;
+        averageDeltaTime = (deltaTime + averageDeltaTime) / 2d;
 
         tower.update(deltaTime);
         view.getSimObjects().forEach(elevator -> elevator.update(deltaTime));
-
-        averageDeltaTime = (deltaTime + averageDeltaTime) / 2d;
     }
 
     public void fixedUpdate() {

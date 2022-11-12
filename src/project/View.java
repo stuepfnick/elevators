@@ -56,7 +56,7 @@ public class View {
         statusFrame = new JFrame("Status");
         statusFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         statusFrame.setMinimumSize(new Dimension(frame.getWidth(), 18 * simObjects.size()));
-        statusFrame.setMaximumSize(new Dimension(frame.getWidth() * 6, 24 * simObjects.size()));
+        statusFrame.setMaximumSize(new Dimension(frame.getWidth() * 8, 24 * simObjects.size()));
         statusFrame.setSize((frame.getWidth() * 4),20 * simObjects.size());
         statusFrame.setLayout(new GridLayout(simObjects.size(), 1));
         for (int i = 0; i < simObjects.size(); i++) {
@@ -65,7 +65,7 @@ public class View {
             statusLabels.add(label);
         }
 
-        statusFrame.setLocation(0, frame.getHeight() + 24);
+        statusFrame.setLocation(0, frame.getHeight() + frame.getInsets().top + 2);
         statusFrame.setVisible(true);
 
         canvas.createBufferStrategy(2);

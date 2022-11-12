@@ -32,10 +32,10 @@ public class Tower {
 
     private void executeRequest(Request request) {
         Elevator fastestElevator = elevators.get(0);
-        double fastestTime = fastestElevator.calculateTimeToFloor(request.getOriginFloor());
+        double fastestTime = fastestElevator.calculateTimeToRequest(request);
         for (var e : elevators) {
             if (e.tryAddPassenger(request)) return; // if we can add passenger to existing queue it has to be faster, so nothing more needed
-            double time = e.calculateTimeToFloor(request.getOriginFloor());
+            double time = e.calculateTimeToRequest(request);
             if (time < fastestTime) {
                 fastestElevator = e;
                 fastestTime = time;

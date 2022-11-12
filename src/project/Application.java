@@ -28,10 +28,11 @@ public class Application {
             System.out.println("command:");
             String input = scanner.nextLine();
 
-            if (input.isEmpty()) {
+            if (input.equalsIgnoreCase("quit") || input.equalsIgnoreCase("exit")) {
                 simulation.stop();
                 break;
             }
+
             if (input.equalsIgnoreCase("arr") || input.equalsIgnoreCase("addRandomRequest")) {
                 addRandomRequest();
 
@@ -69,7 +70,7 @@ public class Application {
 
     private void addRandomRequest() {
         Random random = new Random();
-        int randomFloor = random.nextInt(TowerConstants.NUMBER_OF_FLOORS + 1);
+        int randomFloor = random.nextInt(TowerConstants.NUMBER_OF_FLOORS) + 1;
         if (random.nextBoolean()) {
             simulation.getTower().addRequest(0, randomFloor);
         } else {

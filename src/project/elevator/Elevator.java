@@ -1,15 +1,16 @@
 package project.elevator;
 
-import project.tower.TowerConstants;
 import project.View;
 import project.enums.Direction;
 import project.enums.Status;
 import project.simulation.SimObject;
 import project.simulation.Simulation;
 import project.simulation.SimulationConstants;
+import project.tower.TowerConstants;
 
 import java.awt.*;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import static project.elevator.ElevatorConstants.*;
@@ -48,19 +49,22 @@ public class Elevator implements SimObject {
         return floor1 == floor2 ? 0d : calculateTravelTime(floor1, floor2) + WAITING_TIME;
     }
 
-    public double calculateTimeToFloor(int floor) {
+    public double calculateTimeToRequest(Request request) {
         double remainingActionTime = actionEndTime - Simulation.getTick() / 1000d;
         double totalTime = Math.max(remainingActionTime, 0d);
         totalTime += actionQueue.stream() // time for remaining Actions
                 .mapToDouble(Action::getDuration)
                 .sum();
-        int oldFloor = nextDestinationFloor;
-        for (var request : requestQueue) { // time for remaining Requests
-            totalTime += calculateTravelAndWaitingTime(oldFloor, request.getOriginFloor());
-            totalTime += calculateTravelAndWaitingTime(request.getOriginFloor(), request.getDestinationFloor());
-            oldFloor = request.getDestinationFloor();
+        int previousFloor = nextDestinationFloor;
+        for (var req : requestQueue) { // time for remaining Requests
+            if (request.getOriginFloor() == previousFloor && request.getDestinationFloor() == req.getOriginFloor()) {
+                return totalTime; // if the request corresponds to an empty return trip: return time until then
+            }
+            totalTime += calculateTravelAndWaitingTime(previousFloor, req.getOriginFloor());
+            totalTime += calculateTravelAndWaitingTime(req.getOriginFloor(), req.getDestinationFloor());
+            previousFloor = req.getDestinationFloor();
         }
-        return totalTime + calculateTravelAndWaitingTime(oldFloor, floor); // time to requested floor
+        return totalTime + calculateTravelAndWaitingTime(previousFloor, request.getOriginFloor()); // time to requested floor
     }
 
     public boolean tryAddPassenger(Request request) {
@@ -74,6 +78,16 @@ public class Elevator implements SimObject {
     }
 
     public void addRequest(Request request) {
+        List<Request> requestList = (LinkedList<Request>) requestQueue;
+        int previousFloor = nextDestinationFloor;
+        for (int i = 0; i < requestList.size(); i++) {
+            Request req = requestList.get(i);
+            if (request.getOriginFloor() == previousFloor && request.getDestinationFloor() == req.getOriginFloor()) {
+                requestList.add(i, request); // if request matches empty return run, insert new Request at this position
+                return;
+            }
+            previousFloor = req.getDestinationFloor();
+        }
         requestQueue.add(request);
         if (request.getOriginFloor() == currentFloor && currentStatus == Status.IDLE) {
             actionEndTime = Simulation.getTick() / 1000d + WAITING_TIME;

@@ -16,49 +16,57 @@ public class ElevatorTest {
 
     @ParameterizedTest
     @MethodSource("timeToFloorParameters_requestQueue")
-    void calculateTimeToFloor_requestQueue(int startingFloor, List<Request> requests, int destinationFloor, double expectedTime) {
+    void calculateTimeToFloor_requestQueue(int startingFloor, List<Request> requests, Request mewRequest, double expectedTime) {
         Elevator elevator = new Elevator(0, startingFloor);
         for (var request : requests) {
             elevator.addRequest(request);
         }
-        var result = elevator.calculateTimeToFloor(destinationFloor);
+        var result = elevator.calculateTimeToRequest(mewRequest);
         assertEquals(expectedTime, result, 0.00001d);
     }
 
     @ParameterizedTest
     @MethodSource("timeToFloorParameters_requestQueue")
-    void calculateTimeToFloor_actionAndRequestQueue(int startingFloor, List<Request> requests, int destinationFloor, double expectedTime) {
+    void calculateTimeToFloor_actionAndRequestQueue(int startingFloor, List<Request> requests, Request mewRequest, double expectedTime) {
         Elevator elevator = new Elevator(0, startingFloor);
         for (var request : requests) {
             elevator.addRequest(request);
         }
         elevator.update(0.00000001d); // Convert first Request to Actions
-        var result = elevator.calculateTimeToFloor(destinationFloor);
-        assertEquals(expectedTime, result, 0.0005d);
+        var result = elevator.calculateTimeToRequest(mewRequest);
+        assertEquals(expectedTime, result, 0.001d); // lower delta as very little time has passed
     }
 
     private static Stream<Arguments> timeToFloorParameters_requestQueue() {
         return Stream.of(
-                Arguments.of(
-                        0, List.of(), 0, 0d
-                ), Arguments.of(
-                        15, List.of(), 0, Elevator.calculateTravelTime(15, 0) + WAITING_TIME
-                ), Arguments.of(
-                        0, List.of(new Request(0, 15)), 0,
+                Arguments.of( // 1
+                        0, List.of(), new Request(0, 1), 0d
+                ), Arguments.of( // 2
+                        15, List.of(), new Request(0, 1), Elevator.calculateTravelTime(15, 0) + WAITING_TIME
+                ), Arguments.of( // 3
+                        0, List.of(new Request(0, 15)), new Request(0, 1),
                         WAITING_TIME + Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 0) + WAITING_TIME
-                ), Arguments.of(
-                        0, List.of(new Request(15, 0)), 0,
+                ), Arguments.of( // 4
+                        0, List.of(new Request(15, 0)), new Request(0, 1),
                         Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 0) + WAITING_TIME
-                ), Arguments.of(
-                        0, List.of(new Request(15, 0)), 20,
-                        Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 0) + WAITING_TIME + Elevator.calculateTravelTime(0, 20) + WAITING_TIME
-                ), Arguments.of(
-                        0, List.of(new Request(0, 15)), 20,
+                ), Arguments.of( // 5
+                        0, List.of(new Request(15, 0)), new Request(20, 0),
+                        Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 0) + WAITING_TIME
+                                + Elevator.calculateTravelTime(0, 20) + WAITING_TIME
+                ), Arguments.of( // 6
+                        0, List.of(new Request(0, 15)), new Request(20, 0),
                         WAITING_TIME + Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 20) + WAITING_TIME
-                ), Arguments.of(
-                        0, List.of(new Request(0, 16), new Request(20, 0)), 25,
+                ), Arguments.of( // 7
+                        0, List.of(new Request(0, 16), new Request(20, 0)), new Request(25, 0),
                         WAITING_TIME + Elevator.calculateTravelTime(0, 16) + WAITING_TIME + Elevator.calculateTravelTime(20, 0) + WAITING_TIME
                                 + Elevator.calculateTravelTime(16, 20) + WAITING_TIME + Elevator.calculateTravelTime(0, 25) + WAITING_TIME
+                ), Arguments.of( // 8
+                        20, List.of(new Request(0, 25), new Request(23, 0)), new Request(0, 1),
+                        Elevator.calculateTravelTime(20, 0) + WAITING_TIME + Elevator.calculateTravelTime(0, 25) + WAITING_TIME
+                                + Elevator.calculateTravelTime(25, 23) + WAITING_TIME + Elevator.calculateTravelTime(23, 0) + WAITING_TIME
+                ), Arguments.of( // 9
+                        0, List.of(new Request(0, 20), new Request(0, 30)), new Request(20, 0),
+                        WAITING_TIME + Elevator.calculateTravelTime(0, 20) + WAITING_TIME
                 ));
     }
 
@@ -73,7 +81,8 @@ public class ElevatorTest {
             "0, 10, 10.3279555899",
             "0, 11, 10.833333333333333",
             "0, 12, 11.333333333333333",
-            "0, 15, 12.833333333333333"
+            "0, 15, 12.833333333333333",
+            "20, 0, 15.333333333333333"
     })
     void calculateTravelTime(int originFloor, int destinationFloor, double expectedTime) {
         var result = Elevator.calculateTravelTime(originFloor, destinationFloor);
