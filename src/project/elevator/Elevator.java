@@ -89,9 +89,8 @@ public class Elevator implements SimObject {
             previousFloor = req.getDestinationFloor();
         }
         requestQueue.add(request);
-        if (request.getOriginFloor() == currentFloor && currentStatus == Status.IDLE) {
-            actionEndTime = Simulation.getTick() / 1000d + WAITING_TIME;
-            currentStatus = Status.WAITING;
+        if (request.getOriginFloor() == currentFloor && currentStatus == Status.IDLE && requestQueue.size() == 1) {
+            actionQueue.add(new Action(WAITING_TIME, Status.WAITING, Direction.NONE));
         }
     }
 

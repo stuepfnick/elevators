@@ -73,7 +73,7 @@ public class View {
     }
 
     public void render(float interpolation) {
-        if (bufferStrategy == null) return;
+        if (bufferStrategy == null) return; // View not ready yet
         Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
         g.drawImage(background, 0, 0, WIDTH, HEIGHT, frame);
 
