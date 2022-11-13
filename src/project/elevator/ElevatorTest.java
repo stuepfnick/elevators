@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static project.elevator.Elevator.calculateTravelTime;
 import static project.elevator.ElevatorConstants.*;
 
 public class ElevatorTest {
@@ -21,7 +22,7 @@ public class ElevatorTest {
         for (var request : requests) {
             elevator.addRequest(request);
         }
-        var result = elevator.calculateTimeToRequest(mewRequest);
+        var result = elevator.calculateTimeToDestination(mewRequest);
         assertEquals(expectedTime, result, 0.00001d);
     }
 
@@ -33,40 +34,51 @@ public class ElevatorTest {
             elevator.addRequest(request);
         }
         elevator.update(0.00000001d); // Convert first Request to Actions
-        var result = elevator.calculateTimeToRequest(mewRequest);
+        var result = elevator.calculateTimeToDestination(mewRequest);
         assertEquals(expectedTime, result, 0.001d); // lower delta as very little time has passed
     }
 
     private static Stream<Arguments> timeToFloorParameters_requestQueue() {
         return Stream.of(
                 Arguments.of( // 1
-                        0, List.of(), new Request(0, 1), 0d
+                        0, List.of(), new Request(0, 0), 0d
                 ), Arguments.of( // 2
-                        15, List.of(), new Request(0, 1), Elevator.calculateTravelTime(15, 0) + WAITING_TIME
+                        15, List.of(), new Request(0, 0),
+                        calculateTravelTime(15, 0) + WAITING_TIME
                 ), Arguments.of( // 3
-                        0, List.of(new Request(0, 15)), new Request(0, 1),
-                        WAITING_TIME + Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 0) + WAITING_TIME
+                        15, List.of(new Request(15, 0)), new Request(15, 0),
+                        WAITING_TIME + calculateTravelTime(15, 0) + WAITING_TIME
                 ), Arguments.of( // 4
-                        0, List.of(new Request(15, 0)), new Request(0, 1),
-                        Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 0) + WAITING_TIME
+                        0, List.of(new Request(0, 15)), new Request(0, 1),
+                        WAITING_TIME + calculateTravelTime(0, 15) + WAITING_TIME + calculateTravelTime(15, 1) + WAITING_TIME
                 ), Arguments.of( // 5
-                        0, List.of(new Request(15, 0)), new Request(20, 0),
-                        Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 0) + WAITING_TIME
-                                + Elevator.calculateTravelTime(0, 20) + WAITING_TIME
+                        0, List.of(new Request(15, 0)), new Request(0, 0),
+                        calculateTravelTime(0, 15) + WAITING_TIME + calculateTravelTime(15, 0) + WAITING_TIME
                 ), Arguments.of( // 6
-                        0, List.of(new Request(0, 15)), new Request(20, 0),
-                        WAITING_TIME + Elevator.calculateTravelTime(0, 15) + WAITING_TIME + Elevator.calculateTravelTime(15, 20) + WAITING_TIME
+                        0, List.of(new Request(15, 0)), new Request(20, 0),
+                        calculateTravelTime(0, 15) + WAITING_TIME + calculateTravelTime(15, 0) + WAITING_TIME
+                                + calculateTravelTime(0, 20) + WAITING_TIME + calculateTravelTime(20, 0) + WAITING_TIME
                 ), Arguments.of( // 7
-                        0, List.of(new Request(0, 16), new Request(20, 0)), new Request(25, 0),
-                        WAITING_TIME + Elevator.calculateTravelTime(0, 16) + WAITING_TIME + Elevator.calculateTravelTime(20, 0) + WAITING_TIME
-                                + Elevator.calculateTravelTime(16, 20) + WAITING_TIME + Elevator.calculateTravelTime(0, 25) + WAITING_TIME
+                        0, List.of(new Request(0, 15)), new Request(20, 0),
+                        WAITING_TIME + calculateTravelTime(0, 15) + WAITING_TIME + calculateTravelTime(15, 20) + WAITING_TIME
+                                + calculateTravelTime(20, 0) + WAITING_TIME
                 ), Arguments.of( // 8
-                        20, List.of(new Request(0, 25), new Request(23, 0)), new Request(0, 1),
-                        Elevator.calculateTravelTime(20, 0) + WAITING_TIME + Elevator.calculateTravelTime(0, 25) + WAITING_TIME
-                                + Elevator.calculateTravelTime(25, 23) + WAITING_TIME + Elevator.calculateTravelTime(23, 0) + WAITING_TIME
+                        0, List.of(new Request(0, 16), new Request(20, 0)), new Request(25, 0),
+                        WAITING_TIME + calculateTravelTime(0, 16) + WAITING_TIME + calculateTravelTime(20, 0) + WAITING_TIME
+                                + calculateTravelTime(16, 20) + WAITING_TIME + calculateTravelTime(0, 25) + WAITING_TIME
+                                + calculateTravelTime(25, 0) + WAITING_TIME
                 ), Arguments.of( // 9
+                        20, List.of(new Request(0, 25), new Request(23, 0)), new Request(0, 1),
+                        calculateTravelTime(20, 0) + WAITING_TIME + calculateTravelTime(0, 25) + WAITING_TIME
+                                + calculateTravelTime(25, 23) + WAITING_TIME + calculateTravelTime(23, 0) + WAITING_TIME
+                                + calculateTravelTime(0, 1) + WAITING_TIME
+                ), Arguments.of( // 10
                         0, List.of(new Request(0, 20), new Request(0, 30)), new Request(20, 0),
-                        WAITING_TIME + Elevator.calculateTravelTime(0, 20) + WAITING_TIME
+                        WAITING_TIME + calculateTravelTime(0, 20) + WAITING_TIME + calculateTravelTime(20, 30) + WAITING_TIME
+                                + calculateTravelTime(30, 0) + WAITING_TIME
+                ), Arguments.of( // 11
+                        0, List.of(new Request(20, 0), new Request(22, 0)), new Request(0, 22),
+                        calculateTravelTime(0, 20) + WAITING_TIME + calculateTravelTime(20, 0) + WAITING_TIME + calculateTravelTime(0, 22) + WAITING_TIME
                 ));
     }
 
@@ -84,7 +96,7 @@ public class ElevatorTest {
             "0, 15, 12.833333333333333",
             "20, 0, 15.333333333333333"
     })
-    void calculateTravelTime(int originFloor, int destinationFloor, double expectedTime) {
+    void calculateTravelTime_values(int originFloor, int destinationFloor, double expectedTime) {
         var result = Elevator.calculateTravelTime(originFloor, destinationFloor);
         assertEquals(expectedTime, result, 0.0000000001d);
     }

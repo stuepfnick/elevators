@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static project.tower.TowerConstants.NUMBER_OF_ELEVATORS;
+import static project.tower.TowerConstants.*;
 
 public class Tower {
     private final List<Elevator> elevators;
@@ -32,10 +32,10 @@ public class Tower {
 
     private void executeRequest(Request request) {
         Elevator fastestElevator = elevators.get(0);
-        double fastestTime = fastestElevator.calculateTimeToRequest(request);
+        double fastestTime = fastestElevator.calculateTimeToDestination(request);
         for (var e : elevators) {
             if (e.tryAddPassenger(request)) return; // if we can add passenger to existing queue it has to be faster, so nothing more needed
-            double time = e.calculateTimeToRequest(request);
+            double time = e.calculateTimeToDestination(request);
             if (time < fastestTime) {
                 fastestElevator = e;
                 fastestTime = time;
@@ -56,8 +56,7 @@ public class Tower {
 
     public void update(double deltaTime) {
         while (!requests.isEmpty()) {
-            var request = requests.remove(0);
-            executeRequest(request);
+            executeRequest(requests.remove(0));
         }
     }
 }
