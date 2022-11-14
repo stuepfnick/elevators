@@ -58,7 +58,8 @@ public class Elevator implements SimObject {
         int previousFloor = nextDestinationFloor;
         Request lastRequest = null;
         for (var req : requestQueue) { // time for remaining Requests
-            if (request.getOriginFloor() == previousFloor && request.getDestinationFloor() == req.getOriginFloor()) {
+            if ((request.getOriginFloor() == previousFloor || (lastRequest != null && lastRequest.getNumberOfPassengers() < CAPACITY && request.getOriginFloor() == lastRequest.getOriginFloor()))
+                    && request.getDestinationFloor() == req.getOriginFloor()) {
                 return totalTime + calculateTravelAndWaitingTime(previousFloor, request.getDestinationFloor()); // if the request corresponds to an empty return trip: return time until then
             }
             totalTime += calculateTravelAndWaitingTime(previousFloor, req.getOriginFloor());
@@ -66,15 +67,11 @@ public class Elevator implements SimObject {
             previousFloor = req.getDestinationFloor();
             lastRequest = req;
         }
-        double endTime = calculateTravelAndWaitingTime(previousFloor, request.getOriginFloor()) // time to request origin floor
-                + calculateTravelAndWaitingTime(request.getOriginFloor(), request.getDestinationFloor()); // time to end of new request
-
         if (lastRequest != null && lastRequest.getOriginFloor() == request.getOriginFloor() && lastRequest.getNumberOfPassengers() < CAPACITY) {
-            double alternateTime = totalTime + calculateTravelAndWaitingTime(previousFloor, request.getDestinationFloor());
-            if (totalTime + endTime < alternateTime) System.out.println("Regulär schneller!");
-            return Math.min(totalTime + endTime, alternateTime);
+            return totalTime + calculateTravelAndWaitingTime(previousFloor, request.getDestinationFloor());
         }
-        return totalTime + endTime;
+        return totalTime + calculateTravelAndWaitingTime(previousFloor, request.getOriginFloor()) // time to request origin floor
+                + calculateTravelAndWaitingTime(request.getOriginFloor(), request.getDestinationFloor()); // time to end of new request
     }
 
     public boolean tryAddPassenger(Request request) {
@@ -85,7 +82,8 @@ public class Elevator implements SimObject {
                 return true;
             }
             if (previousRequest != null && previousRequest.getOriginFloor() == request.getOriginFloor() && r.getDestinationFloor() == request.getDestinationFloor()
-                    && previousRequest.getNumberOfPassengers() < CAPACITY) { // if new request spans over 2 existing requests, add passenger to both
+                    && previousRequest.getNumberOfPassengers() < CAPACITY && r.getNumberOfPassengers() < CAPACITY
+                    && previousRequest.getDestinationFloor() == r.getOriginFloor()) { // if new request spans over 2 existing requests, add passenger to both
                 previousRequest.addPassenger();
                 r.addPassenger();
                 return true;
@@ -101,8 +99,14 @@ public class Elevator implements SimObject {
         Request lastRequest = null;
         for (int i = 0; i < requestList.size(); i++) {
             Request req = requestList.get(i);
-            if (request.getOriginFloor() == previousFloor && request.getDestinationFloor() == req.getOriginFloor()) {
-                requestList.add(i, request); // if request matches empty return run, insert new Request at this position
+            if ((request.getOriginFloor() == previousFloor || (lastRequest != null && lastRequest.getNumberOfPassengers() < CAPACITY && request.getOriginFloor() == lastRequest.getOriginFloor()))
+                    && request.getDestinationFloor() == req.getOriginFloor()) {
+                if (lastRequest != null && request.getOriginFloor() == lastRequest.getOriginFloor()) {
+                    lastRequest.addPassenger();
+                    requestList.add(i, new Request(lastRequest.getDestinationFloor(), request.getDestinationFloor()));
+                } else {
+                    requestList.add(i, request); // if request matches empty return run, insert new Request at this position
+                }
                 return;
             }
             previousFloor = req.getDestinationFloor();
