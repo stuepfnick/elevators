@@ -94,7 +94,8 @@ public class ElevatorTest {
             "0, 11, 10.833333333333333",
             "0, 12, 11.333333333333333",
             "0, 15, 12.833333333333333",
-            "20, 0, 15.333333333333333"
+            "20, 0, 15.333333333333333",
+            "0, 50, 30.333333333333333"
     })
     void calculateTravelTime_values(int originFloor, int destinationFloor, double expectedTime) {
         var result = Elevator.calculateTravelTime(originFloor, destinationFloor);
