@@ -72,7 +72,7 @@ public class Simulation implements Runnable {
 
     public void fixedUpdate() {
         tower.fixedUpdate();
-        view.getSimObjects().forEach(SimObject::fixedUpdate);
+        view.getSimObjects().forEach(simObject -> simObject.fixedUpdate(FIXED_DELTA_TIME));
     }
 
     public void stop() {

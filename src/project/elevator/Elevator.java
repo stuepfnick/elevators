@@ -115,7 +115,6 @@ public class Elevator implements SimObject {
                 return;
             }
             if (request.getOriginFloor() == previousFloor && request.getDestinationFloor() == req.getDestinationFloor() && req.getNumberOfPassengers() < CAPACITY) {
-                Request x = new Request(previousFloor, req.getOriginFloor());
                 requestList.add(i, new Request(previousFloor, req.getOriginFloor()));
                 req.addPassenger();
                 return;
@@ -216,14 +215,9 @@ public class Elevator implements SimObject {
     }
 
     @Override
-    public void fixedUpdate() {
-        updateStatus(SimulationConstants.FIXED_DELTA_TIME);
-        position.y += velocity * SimulationConstants.FIXED_DELTA_TIME;
-    }
-
-    @Override
-    public void update(double deltaTime) {
-
+    public void fixedUpdate(double deltaTime) {
+        updateStatus(deltaTime);
+        position.y += velocity * deltaTime;
     }
 
     @Override

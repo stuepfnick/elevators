@@ -13,7 +13,7 @@ import java.util.List;
 
 public class View {
 
-    final int WIDTH = (TowerConstants.NUMBER_OF_ELEVATORS) * SimulationConstants.ELEVATOR_SPACING_PIXEL;
+    public static final int WIDTH = (TowerConstants.NUMBER_OF_ELEVATORS) * SimulationConstants.ELEVATOR_SPACING_PIXEL;
     public static final int HEIGHT = (TowerConstants.NUMBER_OF_FLOORS + 1) * SimulationConstants.FLOOR_HEIGHT_PIXEL;
 
     private final List<SimObject> simObjects = new ArrayList<>();

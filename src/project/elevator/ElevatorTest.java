@@ -33,7 +33,7 @@ public class ElevatorTest {
         for (var request : requests) {
             elevator.addRequest(request);
         }
-        elevator.update(0.00000001d); // Convert first Request to Actions
+        elevator.fixedUpdate(0.02d); // Convert first Request to Actions
         var result = elevator.calculateTimeToDestination(mewRequest);
         assertEquals(expectedTime, result, 0.001d); // lower delta as very little time has passed
     }
