@@ -12,8 +12,7 @@ public class Simulation implements Runnable {
     private final View view;
     private final AtomicBoolean isRunning = new AtomicBoolean();
 
-    private double averageDeltaTime, averageFPS;
-    private double tickLastUpdate, ticksLastFrame;
+    private double averageFPS, tickLastFrame;
 
     public Simulation(Tower tower) {
         this.tower = tower;
@@ -27,11 +26,9 @@ public class Simulation implements Runnable {
 
     @Override
     public void run() {
-        averageDeltaTime = 0.001d; // Some start value that will get more accurate over time
         averageFPS = FRAMES_PER_SECOND;
         double startTime = getTick();
-        tickLastUpdate = startTime;
-        ticksLastFrame = startTime;
+        tickLastFrame = startTime;
         double skipUpdateTicks = 1000d / FIXED_UPDATES_PER_SECOND;
         double nextGameTick = startTime + skipUpdateTicks;
         double skipFrameTicks = 1000d / FRAMES_PER_SECOND;
@@ -46,7 +43,6 @@ public class Simulation implements Runnable {
                 nextGameTick += skipUpdateTicks;
                 loops++;
             }
-            update();
 
             double currentFrameTick = getTick();
             if (currentFrameTick >= nextFrameTick) {
@@ -57,16 +53,14 @@ public class Simulation implements Runnable {
         }
 
         System.out.println();
-        System.out.println("averageDeltaTime: " + String.format("%.10f", averageDeltaTime) + " (" + averageDeltaTime + ')');
-        System.out.println("average Updates per Second: " + (1d / averageDeltaTime));
         System.out.println("averageFPS: " + averageFPS);
         view.close();
     }
 
     private void render(float interpolation) {
         double currentTick = getTick();
-        double currentFPS = 1000d / (currentTick - ticksLastFrame);
-        ticksLastFrame = currentTick;
+        double currentFPS = 1000d / (currentTick - tickLastFrame);
+        tickLastFrame = currentTick;
         averageFPS = (currentFPS + averageFPS) / 2d;
 
         view.render(interpolation);
@@ -76,17 +70,8 @@ public class Simulation implements Runnable {
         return System.nanoTime() / 1000000d;
     }
 
-    public void update() {
-        double currentTick = getTick();
-        double deltaTime = (currentTick - tickLastUpdate) / 1000d;
-        tickLastUpdate = currentTick;
-        averageDeltaTime = (deltaTime + averageDeltaTime) / 2d;
-
-        tower.update(deltaTime);
-        view.getSimObjects().forEach(elevator -> elevator.update(deltaTime));
-    }
-
     public void fixedUpdate() {
+        tower.fixedUpdate();
         view.getSimObjects().forEach(SimObject::fixedUpdate);
     }
 
