@@ -98,33 +98,42 @@ public class Elevator implements SimObject {
         currentFloor = (int) Math.round(position.y / TowerConstants.FLOOR_HEIGHT);
 
         double currentTime = Simulation.getTick() / 1000d;
-        if (actionEndTime <= currentTime) {
-            if (!actionQueue.isEmpty()) {
+        if (currentTime >= actionEndTime) {  // action end or no action running
+            double difference = currentTime - actionEndTime;
+            difference = difference <= deltaTime ? difference : 0d;
+            updateVelocity(deltaTime - difference);
+
+            if (!actionQueue.isEmpty()) { // get next action from queue
                 Action action = actionQueue.remove();
-                actionEndTime = currentTime + action.getDuration();
                 currentStatus = action.getStatus();
                 currentDirection = action.getDirection();
+                actionEndTime = currentTime - difference + action.getDuration();
+                updateVelocity(difference);
             } else {
                 speed = 0d;
                 velocity = speed;
                 currentStatus = Status.IDLE;
                 evaluateActions();
             }
-        } else {
-            switch (currentStatus) {
-                case ACCELERATING -> {
-                    speed += ACCELERATION * deltaTime;
-                    speed = Math.min(speed, MAX_SPEED);
-                }
-                case DECELERATING, WAITING -> {
-                    speed -= ACCELERATION * deltaTime;
-                    speed = Math.max(speed, 0d);
-                }
+        } else { // action running
+            updateVelocity(deltaTime);
+        }
+    }
+
+    private void updateVelocity(double deltaTime) {
+        switch (currentStatus) {
+            case ACCELERATING -> {
+                speed += ACCELERATION * deltaTime;
+                speed = Math.min(speed, MAX_SPEED);
             }
-            switch (currentDirection) {
-                case UP, NONE -> velocity = speed;
-                case DOWN -> velocity = -speed;
+            case DECELERATING, WAITING -> {
+                speed -= ACCELERATION * deltaTime;
+                speed = Math.max(speed, 0d);
             }
+        }
+        switch (currentDirection) {
+            case UP, NONE -> velocity = speed;
+            case DOWN -> velocity = -speed;
         }
     }
 
@@ -167,13 +176,9 @@ public class Elevator implements SimObject {
     }
 
     @Override
-    public void fixedUpdate() {
-        position.y += velocity * SimulationConstants.FIXED_DELTA_TIME;
-    }
-
-    @Override
-    public void update(double deltaTime) {
+    public void fixedUpdate(double deltaTime) {
         updateStatus(deltaTime);
+        position.y += velocity * deltaTime;
     }
 
     @Override

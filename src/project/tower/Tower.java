@@ -54,7 +54,7 @@ public class Tower {
         return elevators;
     }
 
-    public void update(double deltaTime) {
+    public void update() {
         while (!requests.isEmpty()) {
             var request = requests.remove(0);
             executeRequest(request);

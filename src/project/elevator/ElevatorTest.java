@@ -32,9 +32,9 @@ public class ElevatorTest {
         for (var request : requests) {
             elevator.addRequest(request);
         }
-        elevator.update(0.00000001d); // Convert first Request to Actions
+        elevator.fixedUpdate(0.02d); // Convert first Request to Actions
         var result = elevator.calculateTimeToRequest(mewRequest);
-        assertEquals(expectedTime, result, 0.001d); // lower delta as very little time has passed
+        assertEquals(expectedTime, result, 0.0001d); // lower delta as very little time has passed
     }
 
     private static Stream<Arguments> timeToFloorParameters_requestQueue() {
@@ -82,7 +82,14 @@ public class ElevatorTest {
             "0, 11, 10.833333333333333",
             "0, 12, 11.333333333333333",
             "0, 15, 12.833333333333333",
-            "20, 0, 15.333333333333333"
+            "20, 0, 15.333333333333333",
+            "0, 25, 17.833333333333333",
+            "30, 0, 20.333333333333333",
+            "0, 35, 22.833333333333333",
+            "40, 0, 25.333333333333333",
+            "0, 45, 27.833333333333333",
+            "0, 50, 30.333333333333333",
+            "55, 0, 32.833333333333333"
     })
     void calculateTravelTime(int originFloor, int destinationFloor, double expectedTime) {
         var result = Elevator.calculateTravelTime(originFloor, destinationFloor);
