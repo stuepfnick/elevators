@@ -138,29 +138,24 @@ public class Elevator implements SimObject {
         currentFloor = (int) Math.round(position.y / TowerConstants.FLOOR_HEIGHT);
 
         double currentTime = Simulation.getTick() / 1000d;
-        if (currentTime >= actionEndTime) {
+        if (currentTime >= actionEndTime) { // action end or no action running
             double difference = currentTime - actionEndTime;
-            if (difference <= deltaTime) {
-                updateVelocity(deltaTime - difference);
-            }
+            difference = difference <= deltaTime ? difference : 0d;
+            updateVelocity(deltaTime - difference);
 
-            if (!actionQueue.isEmpty()) {
+            if (!actionQueue.isEmpty()) { // get next action from queue
                 Action action = actionQueue.remove();
                 currentStatus = action.getStatus();
                 currentDirection = action.getDirection();
-                if (difference <= deltaTime) {
-                    updateVelocity(difference);
-                    actionEndTime = actionEndTime + action.getDuration();
-                } else {
-                    actionEndTime = currentTime + action.getDuration();
-                }
+                actionEndTime = currentTime - difference + action.getDuration();
+                updateVelocity(difference);
             } else {
                 speed = 0d;
                 velocity = speed;
                 currentStatus = Status.IDLE;
                 evaluateActions();
             }
-        } else {
+        } else { // action running
             updateVelocity(deltaTime);
         }
     }
