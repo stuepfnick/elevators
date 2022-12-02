@@ -19,6 +19,16 @@ public class Tower {
         initElevators();
     }
 
+    public List<Elevator> getElevators() {
+        return elevators;
+    }
+
+    /**
+     * Adds the request to it's own queue.
+     * (as it is on another thread than the simulation)
+     * @param originFloor from floor
+     * @param destinationFloor to floor
+     */
     public void addRequest(int originFloor, int destinationFloor) {
         if (originFloor == destinationFloor) {
             System.out.println("Origin and destination floors have to be different!");
@@ -30,6 +40,11 @@ public class Tower {
         requests.add(new Request(originFloor, destinationFloor));
     }
 
+    /**
+     * Finally adds the request to the elevator which can execute it as fastest. <br>
+     * This gets called from same thread as Simulation, so cannot cause a concurrent modification problem.
+     * @param request
+     */
     private void executeRequest(Request request) {
         Elevator fastestElevator = elevators.get(0);
         double fastestTime = fastestElevator.calculateTimeToRequest(request);
@@ -44,16 +59,19 @@ public class Tower {
         fastestElevator.addRequest(request);
     }
 
+    /**
+     * Creates the elevators and add them to the List
+     */
     private void initElevators() {
         for (int i = 0; i < NUMBER_OF_ELEVATORS; i++) {
             elevators.add(new Elevator(i, 0));
         }
     }
 
-    public List<Elevator> getElevators() {
-        return elevators;
-    }
-
+    /**
+     * Called from the Simulation Thread
+     * Calls the executeRequest for each Request, which was stored in between 2 updates
+     */
     public void update() {
         while (!requests.isEmpty()) {
             var request = requests.remove(0);

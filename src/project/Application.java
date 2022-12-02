@@ -8,6 +8,19 @@ import java.util.*;
 
 public class Application {
     private final Simulation simulation;
+
+    /**
+     * Application entry point
+     * @param args ignored
+     */
+    public static void main(String[] args) {
+        new Application();
+    }
+
+    /**
+     * Creates new Simulation with new Tower and starts the Simulation <br>
+     * as a new thread, so you can still enter commands in command line
+     */
     public Application() {
         simulation = new Simulation(new Tower());
         Thread t = new Thread(simulation);
@@ -16,10 +29,10 @@ public class Application {
         askForInput();
     }
 
-    public static void main(String[] args) {
-        new Application();
-    }
-
+    /**
+     * The input main loop,
+     * here you enter the new Requests
+     */
     public void askForInput() {
         var elevators = simulation.getTower().getElevators();
         Scanner scanner = new Scanner(System.in);
@@ -68,6 +81,9 @@ public class Application {
         }
     }
 
+    /**
+     * Method for adding a random Request, so askForInput does not get to overloaded
+     */
     private void addRandomRequest() {
         Random random = new Random();
         int randomFloor = random.nextInt(TowerConstants.NUMBER_OF_FLOORS) + 1;
@@ -78,6 +94,10 @@ public class Application {
         }
     }
 
+    /**
+     * Method for adding a regular Request, so askForInput does not get to overloaded
+     * @param inputs as a List of Strings (only works with a size of 2)
+     */
     private void addRequest(List<String> inputs) {
         if (inputs.size() != 2) {
             System.out.println("You need to enter 2 floors for a request!");

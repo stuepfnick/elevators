@@ -29,6 +29,9 @@ public class View {
         SwingUtilities.invokeLater(this::createAndShowGUI);
     }
 
+    /**
+     * Creates and shows the GUI
+     */
     private void createAndShowGUI() {
         // Sim View
         frame = new JFrame("Simulation");
@@ -72,6 +75,11 @@ public class View {
         bufferStrategy = canvas.getBufferStrategy();
     }
 
+    /**
+     * View render calls the render method for each SimObject
+     * and also updates the statusLabels for them
+     * @param interpolation passes on interpolation value
+     */
     public void render(float interpolation) {
         if (bufferStrategy == null) return; // View not ready yet
         Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
@@ -89,6 +97,10 @@ public class View {
         bufferStrategy.show();
     }
 
+    /**
+     * prepares the background, so it does not need to be drawn every frame
+     * @param g
+     */
     private void drawBackground(Graphics2D g) {
         g.setBackground(Color.WHITE);
         g.clearRect(0, 0, WIDTH * 2, HEIGHT * 2);
@@ -101,6 +113,11 @@ public class View {
         }
     }
 
+    /**
+     * A method for modifying font size for a certain graphics context
+     * @param g graphics context
+     * @param size multiplier for font size compared to previous size
+     */
     private void setFontSize(Graphics2D g, float size) {
         Font currentFont = g.getFont();
         Font newFont = currentFont.deriveFont(currentFont.getSize() * size);
@@ -111,6 +128,9 @@ public class View {
         return simObjects;
     }
 
+    /**
+     * Close the View(s)
+     */
     public void close() {
         frame.dispose();
         statusFrame.dispose();

@@ -7,6 +7,11 @@ public class Request {
     private final int destinationFloor;
     private int numberOfPassengers;
 
+    /**
+     * Constructor always takes 2 params
+     * @param originFloor from floor
+     * @param destinationFloor to floor
+     */
     public Request(int originFloor, int destinationFloor) {
         this.originFloor = originFloor;
         this.destinationFloor = destinationFloor;
@@ -25,10 +30,19 @@ public class Request {
         return numberOfPassengers;
     }
 
+    /**
+     * Simply increase passenger count by 1
+     */
     public void addPassenger() {
         numberOfPassengers++;
     }
 
+    /**
+     * Only checks the other object for origin and destination. <br>
+     * <b>Not</b> for numberOfPassengers, as they should be considered as equal from just the floors.
+     * @param o
+     * @return
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -37,11 +51,19 @@ public class Request {
         return originFloor == request.originFloor && destinationFloor == request.destinationFloor;
     }
 
+    /**
+     * hashCode also only for originFloor and destinationFloor.
+     * @return
+     */
     @Override
     public int hashCode() {
         return Objects.hash(originFloor, destinationFloor);
     }
 
+    /**
+     * toString method has a custom formatting.
+     * @return
+     */
     @Override
     public String toString() {
         return originFloor +

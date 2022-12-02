@@ -27,6 +27,11 @@ public class Elevator implements SimObject {
     private Status currentStatus;
     private Direction currentDirection;
 
+    /**
+     * Constructor takes 2 params
+     * @param index the index of elevator in Tower List
+     * @param currentFloor the floor, where the elevator starts
+     */
     public Elevator(int index, int currentFloor) {
         this.currentFloor = currentFloor;
         nextDestinationFloor = currentFloor;
@@ -37,6 +42,12 @@ public class Elevator implements SimObject {
         currentDirection = Direction.NONE;
     }
 
+    /**
+     * Calculates the pure travel time between 2 floors
+     * @param floor1 origin floor
+     * @param floor2 destination floor
+     * @return time as double in seconds
+     */
     public static double calculateTravelTime(int floor1, int floor2) {
         double distance = Math.abs((floor2 - floor1) * TowerConstants.FLOOR_HEIGHT);
         if (distance > DISTANCE_TO_ACCELERATE * 2) {
@@ -49,6 +60,11 @@ public class Elevator implements SimObject {
         return floor1 == floor2 ? 0d : calculateTravelTime(floor1, floor2) + WAITING_TIME;
     }
 
+    /**
+     * Calculates the time needed, until the elevator reaches the origin floor of the new request
+     * @param request the new Request
+     * @return time as double
+     */
     public double calculateTimeToRequest(Request request) {
         double remainingActionTime = actionEndTime - Simulation.getTick() / 1000d;
         double totalTime = Math.max(remainingActionTime, 0d);
@@ -67,6 +83,11 @@ public class Elevator implements SimObject {
         return totalTime + calculateTravelAndWaitingTime(previousFloor, request.getOriginFloor()); // time to requested floor
     }
 
+    /**
+     * Tries to add a passenger to an existing Request
+     * @param request incoming Request
+     * @return boolean, if it could add the passenger
+     */
     public boolean tryAddPassenger(Request request) {
         return requestQueue.stream()
                 .filter(r -> r.equals(request) && r.getNumberOfPassengers() < CAPACITY) // if request is in queue and under capacity
@@ -77,6 +98,11 @@ public class Elevator implements SimObject {
                 }).orElse(false);
     }
 
+    /**
+     * Actually adds the new Request into the queue <br>
+     * Normally at the end of queue, or if it finds an empty return run
+     * @param request the new Request
+     */
     public void addRequest(Request request) {
         List<Request> requestList = (LinkedList<Request>) requestQueue;
         int previousFloor = nextDestinationFloor;
@@ -94,6 +120,11 @@ public class Elevator implements SimObject {
         }
     }
 
+    /**
+     * Updates status, depending on different things like currentAction, ActionQueue <br>
+     * and requestQueue
+     * @param deltaTime the time passed, since last call in seconds.
+     */
     private void updateStatus(double deltaTime) {
         currentFloor = (int) Math.round(position.y / TowerConstants.FLOOR_HEIGHT);
 
@@ -120,6 +151,10 @@ public class Elevator implements SimObject {
         }
     }
 
+    /**
+     * Updates only the velocity (depending on currentStatus and currentDirection).
+     * @param deltaTime time passed, since last call in seconds.
+     */
     private void updateVelocity(double deltaTime) {
         switch (currentStatus) {
             case ACCELERATING -> {
@@ -137,6 +172,9 @@ public class Elevator implements SimObject {
         }
     }
 
+    /**
+     * Evaluates the following actions, depending on the queues
+     */
     private void evaluateActions() {
         if (requestQueue.peek() != null) {
             if (requestQueue.peek().getOriginFloor() == currentFloor && currentStatus == Status.IDLE) {

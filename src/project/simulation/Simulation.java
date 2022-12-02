@@ -24,6 +24,12 @@ public class Simulation implements Runnable {
         return tower;
     }
 
+    /**
+     * Holds the main loop
+     * Does the fixedUpdate at a certain rate, even if it can not hold the FPS.<br>
+     * Also calculates an interpolation between fixedUpdates, so the rendering<br>
+     * can be smooth, even if the fixedUpdate rate is much lower as FPS.
+     */
     @Override
     public void run() {
         averageFPS = FRAMES_PER_SECOND;
@@ -57,6 +63,11 @@ public class Simulation implements Runnable {
         view.close();
     }
 
+    /**
+     * calculates currentFPS and averageFPS
+     * and calls the render method for the view.
+     * @param interpolation gets passed on from main sim loop
+     */
     private void render(float interpolation) {
         double currentTick = getTick();
         double currentFPS = 1000d / (currentTick - tickLastFrame);
@@ -66,15 +77,26 @@ public class Simulation implements Runnable {
         view.render(interpolation);
     }
 
+    /**
+     * A static method for getting the current tick as double.
+     * @return current tick as double
+     */
     public static double getTick() {
         return System.nanoTime() / 1000000d;
     }
 
+    /**
+     * Updates the tower and calls
+     * fixedUpdate for each SimObject.
+     */
     public void fixedUpdate() {
         tower.update();
         view.getSimObjects().forEach(simObject -> simObject.fixedUpdate(FIXED_DELTA_TIME));
     }
 
+    /**
+     * Stop the simulation
+     */
     public void stop() {
         isRunning.set(false);
     }
