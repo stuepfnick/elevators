@@ -41,7 +41,7 @@ public class Tower {
     }
 
     /**
-     * Finally adds the request to the elevator which can execute it as fastest. <br>
+     * Finally adds the request to the elevator which can execute it as fastest.<br>
      * This gets called from same thread as Simulation, so cannot cause a concurrent modification problem.
      * @param request
      */
@@ -60,7 +60,7 @@ public class Tower {
     }
 
     /**
-     * Creates the elevators and add them to the List
+     * Creates the elevators and add them to the List.
      */
     private void initElevators() {
         for (int i = 0; i < NUMBER_OF_ELEVATORS; i++) {
@@ -69,8 +69,8 @@ public class Tower {
     }
 
     /**
-     * Called from the Simulation Thread
-     * Calls the executeRequest for each Request, which was stored in between 2 updates
+     * Called from the Simulation Thread:<br>
+     * Calls the executeRequest for each Request, which was stored in between 2 updates.
      */
     public void update() {
         while (!requests.isEmpty()) {

@@ -6,11 +6,16 @@ import project.simulation.Simulation;
 
 import java.util.*;
 
+/**
+ * Elevators coding challenge for DC tower
+ * @author Stefan Sigmund
+ */
+
 public class Application {
     private final Simulation simulation;
 
     /**
-     * Application entry point
+     * Application entry point.
      * @param args ignored
      */
     public static void main(String[] args) {
@@ -19,7 +24,7 @@ public class Application {
 
     /**
      * Creates new Simulation with new Tower and starts the Simulation <br>
-     * as a new thread, so you can still enter commands in command line
+     * as a new thread, so you can still enter commands in command line.
      */
     public Application() {
         simulation = new Simulation(new Tower());
@@ -31,7 +36,7 @@ public class Application {
 
     /**
      * The input main loop,
-     * here you enter the new Requests
+     * here you enter the new Requests.
      */
     public void askForInput() {
         var elevators = simulation.getTower().getElevators();
@@ -82,7 +87,7 @@ public class Application {
     }
 
     /**
-     * Method for adding a random Request, so askForInput does not get to overloaded
+     * Method for adding a random Request, so askForInput does not get to overloaded.
      */
     private void addRandomRequest() {
         Random random = new Random();
@@ -95,7 +100,7 @@ public class Application {
     }
 
     /**
-     * Method for adding a regular Request, so askForInput does not get to overloaded
+     * Method for adding a regular Request, so askForInput does not get to overloaded.
      * @param inputs as a List of Strings (only works with a size of 2)
      */
     private void addRequest(List<String> inputs) {
