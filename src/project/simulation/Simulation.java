@@ -27,7 +27,7 @@ public class Simulation implements Runnable {
     /**
      * Holds the main loop
      * Does the fixedUpdate at a certain rate, even if it can not hold the FPS.<br>
-     * Also calculates an interpolation between fixedUpdates, so the rendering<br>
+     * Also calculates an interpolation between fixedUpdates, so the rendering
      * can be smooth, even if the fixedUpdate rate is much lower as FPS.
      */
     @Override
@@ -64,8 +64,8 @@ public class Simulation implements Runnable {
     }
 
     /**
-     * calculates currentFPS and averageFPS
-     * and calls the render method for the view.
+     * Calculates currentFPS and averageFPS and
+     * calls the render method for the view.
      * @param interpolation gets passed on from main sim loop
      */
     private void render(float interpolation) {
@@ -86,8 +86,7 @@ public class Simulation implements Runnable {
     }
 
     /**
-     * Updates the tower and calls
-     * fixedUpdate for each SimObject.
+     * Updates the tower and calls fixedUpdate for each SimObject.
      */
     public void fixedUpdate() {
         tower.update();
@@ -95,7 +94,7 @@ public class Simulation implements Runnable {
     }
 
     /**
-     * Stop the simulation
+     * Stops the simulation
      */
     public void stop() {
         isRunning.set(false);

@@ -23,7 +23,7 @@ public class Application {
     }
 
     /**
-     * Creates new Simulation with new Tower and starts the Simulation <br>
+     * Creates new Simulation with new Tower and starts the Simulation
      * as a new thread, so you can still enter commands in command line.
      */
     public Application() {
@@ -35,8 +35,8 @@ public class Application {
     }
 
     /**
-     * The input main loop,
-     * here you enter the new Requests.
+     * The input main loop.<br>
+     * Here you enter the commands to add new Requests.
      */
     public void askForInput() {
         var elevators = simulation.getTower().getElevators();

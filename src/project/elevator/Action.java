@@ -12,7 +12,7 @@ public class Action {
     private final Direction direction;
 
     /**
-     * Constructor always takes 3 parameters
+     * Constructor always takes 3 parameters.
      * @param duration in seconds
      * @param status
      * @param direction

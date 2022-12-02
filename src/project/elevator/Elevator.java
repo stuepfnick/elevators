@@ -63,7 +63,7 @@ public class Elevator implements SimObject {
     /**
      * Calculates the time needed, until the elevator reaches the origin floor of the new request
      * @param request the new Request
-     * @return time as double
+     * @return time as double in seconds
      */
     public double calculateTimeToRequest(Request request) {
         double remainingActionTime = actionEndTime - Simulation.getTick() / 1000d;
@@ -84,9 +84,9 @@ public class Elevator implements SimObject {
     }
 
     /**
-     * Tries to add a passenger to an existing Request
+     * Tries to add a passenger to an existing Request.
      * @param request incoming Request
-     * @return boolean, if it could add the passenger
+     * @return boolean, if it could add the passenger.
      */
     public boolean tryAddPassenger(Request request) {
         return requestQueue.stream()
@@ -99,8 +99,8 @@ public class Elevator implements SimObject {
     }
 
     /**
-     * Actually adds the new Request into the queue <br>
-     * Normally at the end of queue, or if it finds an empty return run
+     * Actually adds the new Request into the queue. <br>
+     * Normally at the end of queue, or if it finds an empty return run.
      * @param request the new Request
      */
     public void addRequest(Request request) {
@@ -121,8 +121,7 @@ public class Elevator implements SimObject {
     }
 
     /**
-     * Updates status, depending on different things like currentAction, ActionQueue <br>
-     * and requestQueue
+     * Updates status, depending on different things like currentAction, actionEndTime and ActionQueue.
      * @param deltaTime the time passed, since last call in seconds.
      */
     private void updateStatus(double deltaTime) {
@@ -173,7 +172,7 @@ public class Elevator implements SimObject {
     }
 
     /**
-     * Evaluates the following actions, depending on the queues
+     * Evaluates the following actions, depending on the requestQueue.
      */
     private void evaluateActions() {
         if (requestQueue.peek() != null) {

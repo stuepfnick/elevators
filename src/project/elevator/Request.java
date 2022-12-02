@@ -8,7 +8,7 @@ public class Request {
     private int numberOfPassengers;
 
     /**
-     * Constructor always takes 2 params
+     * Constructor always takes 2 params.
      * @param originFloor from floor
      * @param destinationFloor to floor
      */
