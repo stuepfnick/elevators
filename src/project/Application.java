@@ -94,6 +94,7 @@ public class Application {
                 numbers.add(number);
             } catch (NumberFormatException e) {
                 System.out.println(value + " is no whole number!");
+                return;
             }
         }
         simulation.getTower().addRequest(numbers.get(0), numbers.get(1));
