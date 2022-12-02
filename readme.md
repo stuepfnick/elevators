@@ -10,7 +10,7 @@ Simply clone the repo*, run it and enter the commands in the console (it will sh
 **for ElevatorTest you need to add JUnit (5) library to the project, if you just want run the application, you can also delete "ElevatorTest.java" after cloning*
   
 **Screenshot:**<br>
-<img src="elevators_screenshot.jpg" width="538">
+<img src="elevators_screenshot.jpg" width="494">
 
 Status Windows shows in each row: <br>
 #Elevator: #Floor - height in meters, currentStatus, direction -> #DestinationFloor (#Passengers) [#RequestFromFloor-#RequestToFloor (#Passengers), …]
