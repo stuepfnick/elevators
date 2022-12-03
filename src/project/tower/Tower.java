@@ -9,6 +9,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static project.tower.TowerConstants.NUMBER_OF_ELEVATORS;
 
+/**
+ * The Tower object holds the List of elevators
+ * and handles the Requests.
+ */
 public class Tower {
     private final List<Elevator> elevators;
     private final List<Request> requests;
@@ -43,7 +47,7 @@ public class Tower {
     /**
      * Finally adds the request to the elevator which can execute it as fastest.<br>
      * This gets called from same thread as Simulation, so cannot cause a concurrent modification problem.
-     * @param request
+     * @param request the Request to be added
      */
     private void executeRequest(Request request) {
         Elevator fastestElevator = elevators.get(0);

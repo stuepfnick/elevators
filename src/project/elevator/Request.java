@@ -2,13 +2,16 @@ package project.elevator;
 
 import java.util.Objects;
 
+/**
+ * Data class for holding a Request.
+ */
 public class Request {
     private final int originFloor;
     private final int destinationFloor;
     private int numberOfPassengers;
 
     /**
-     * Constructor always takes 2 params.
+     * Constructor always takes 2 parameters.
      * @param originFloor from floor
      * @param destinationFloor to floor
      */
@@ -31,7 +34,7 @@ public class Request {
     }
 
     /**
-     * Simply increase passenger count by 1
+     * Simply increase passenger count by 1.
      */
     public void addPassenger() {
         numberOfPassengers++;
@@ -39,9 +42,10 @@ public class Request {
 
     /**
      * Only checks the other object for origin and destination. <br>
-     * <b>Not</b> for numberOfPassengers, as they should be considered as equal from just the floors.
-     * @param o
-     * @return
+     * Does <b>not</b> compare numberOfPassengers, as Requests should be considered as equal from just the floors.
+     * (independent of passenger count)
+     * @param o other Object
+     * @return boolean
      */
     @Override
     public boolean equals(Object o) {
@@ -53,7 +57,7 @@ public class Request {
 
     /**
      * hashCode also only for originFloor and destinationFloor.
-     * @return
+     * @return the hash as int
      */
     @Override
     public int hashCode() {
@@ -61,8 +65,8 @@ public class Request {
     }
 
     /**
-     * toString method has a custom formatting.
-     * @return
+     * toString method has a custom formatting
+     * @return a String like: "0-15 (1)"
      */
     @Override
     public String toString() {

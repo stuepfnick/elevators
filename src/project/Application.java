@@ -10,7 +10,6 @@ import java.util.*;
  * Elevators coding challenge for DC tower
  * @author Stefan Sigmund
  */
-
 public class Application {
     private final Simulation simulation;
 
@@ -36,7 +35,7 @@ public class Application {
 
     /**
      * The input main loop.<br>
-     * Here you enter the commands to add new Requests.
+     * Here it waits for the User to enter commands to add new Requests.
      */
     public void askForInput() {
         var elevators = simulation.getTower().getElevators();

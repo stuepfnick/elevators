@@ -2,11 +2,14 @@ package project.simulation;
 
 import java.awt.*;
 
+/**
+ * Interface for all objects that should be part of the Simulation
+ */
 public interface SimObject {
 
     /**
      * fixedUpdate is called at a fixed rate.
-     * @param deltaTime
+     * @param deltaTime time since last call in seconds
      */
     void fixedUpdate(double deltaTime);
 

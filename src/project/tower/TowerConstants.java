@@ -1,5 +1,8 @@
 package project.tower;
 
+/**
+ * Constants affecting the Tower
+ */
 public class TowerConstants {
     public static final int NUMBER_OF_ELEVATORS = 7;
     public static final int NUMBER_OF_FLOORS = 55;

@@ -15,6 +15,10 @@ import java.util.Queue;
 
 import static project.elevator.ElevatorConstants.*;
 
+/**
+ * The actual Elevator class which holds most of the logic.<br>
+ * Implements SimObject, so it can be used for the Simulation.
+ */
 public class Elevator implements SimObject {
     private final Point.Double position;
     private double speed, velocity;
@@ -28,7 +32,7 @@ public class Elevator implements SimObject {
     private Direction currentDirection;
 
     /**
-     * Constructor takes 2 params
+     * Constructor always takes 2 parameters
      * @param index the index of elevator in Tower List
      * @param currentFloor the floor, where the elevator starts
      */
@@ -43,7 +47,7 @@ public class Elevator implements SimObject {
     }
 
     /**
-     * Calculates the pure travel time between 2 floors
+     * Calculates the pure travel time between 2 floors.
      * @param floor1 origin floor
      * @param floor2 destination floor
      * @return time as double in seconds
@@ -56,6 +60,13 @@ public class Elevator implements SimObject {
         return Math.sqrt(distance / ACCELERATION) * 2;
     }
 
+    /**
+     * Calculates the travel time between two floors, and adds the WAITING_TIME
+     * only if the floors are actually different.
+     * @param floor1 origin floor
+     * @param floor2 destination floor
+     * @return time as double in seconds
+     */
     public static double calculateTravelAndWaitingTime(int floor1, int floor2) {
         return floor1 == floor2 ? 0d : calculateTravelTime(floor1, floor2) + WAITING_TIME;
     }
@@ -86,7 +97,7 @@ public class Elevator implements SimObject {
     /**
      * Tries to add a passenger to an existing Request.
      * @param request incoming Request
-     * @return boolean, if it could add the passenger.
+     * @return boolean, if it could add the passenger
      */
     public boolean tryAddPassenger(Request request) {
         return requestQueue.stream()
@@ -122,7 +133,7 @@ public class Elevator implements SimObject {
 
     /**
      * Updates status, depending on different things like currentAction, actionEndTime and ActionQueue.
-     * @param deltaTime the time passed, since last call in seconds.
+     * @param deltaTime time since last call in seconds
      */
     private void updateStatus(double deltaTime) {
         currentFloor = (int) Math.round(position.y / TowerConstants.FLOOR_HEIGHT);
@@ -152,7 +163,7 @@ public class Elevator implements SimObject {
 
     /**
      * Updates only the velocity (depending on currentStatus and currentDirection).
-     * @param deltaTime time passed, since last call in seconds.
+     * @param deltaTime time since last call in seconds
      */
     private void updateVelocity(double deltaTime) {
         switch (currentStatus) {
@@ -181,7 +192,7 @@ public class Elevator implements SimObject {
                 nextDestinationFloor = request.getDestinationFloor();
                 numberOfPassengers = request.getNumberOfPassengers();
             } else {
-                nextDestinationFloor = requestQueue.peek().getOriginFloor();
+                nextDestinationFloor = requestQueue.peek().getOriginFloor(); // here IntelliJ does not get, that it is within a null check
                 numberOfPassengers = 0;
             }
             double displacement = nextDestinationFloor * TowerConstants.FLOOR_HEIGHT - position.y;

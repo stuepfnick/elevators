@@ -14,8 +14,8 @@ public class Action {
     /**
      * Constructor always takes 3 parameters.
      * @param duration in seconds
-     * @param status
-     * @param direction
+     * @param status enum
+     * @param direction enum
      */
     public Action(double duration, Status status, Direction direction) {
         this.duration = duration;

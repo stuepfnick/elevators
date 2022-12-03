@@ -7,6 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static project.simulation.SimulationConstants.*;
 
+/**
+ * The Simulation implementing a Runnable to be executed as Thread.
+ */
 public class Simulation implements Runnable {
     private final Tower tower;
     private final View view;
@@ -27,8 +30,8 @@ public class Simulation implements Runnable {
     /**
      * Holds the main loop
      * Does the fixedUpdate at a certain rate, even if it can not hold the FPS.<br>
-     * Also calculates an interpolation between fixedUpdates, so the rendering
-     * can be smooth, even if the fixedUpdate rate is much lower as FPS.
+     * Also calculates an interpolation between fixedUpdates (0.0 - 1.0), so
+     * the rendering can be smooth, even if the fixedUpdate rate is much lower than FPS.
      */
     @Override
     public void run() {
@@ -86,7 +89,8 @@ public class Simulation implements Runnable {
     }
 
     /**
-     * Updates the tower and calls fixedUpdate for each SimObject.
+     * Updates the tower and calls fixedUpdate for each SimObject.<br>
+     * Passes deltaTime to all objects.
      */
     public void fixedUpdate() {
         tower.update();
@@ -94,7 +98,7 @@ public class Simulation implements Runnable {
     }
 
     /**
-     * Stops the simulation
+     * Stops the simulation.
      */
     public void stop() {
         isRunning.set(false);

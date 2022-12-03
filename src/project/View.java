@@ -77,7 +77,7 @@ public class View {
 
     /**
      * View render calls the render method for each SimObject
-     * and also updates the statusLabels for them
+     * and also updates the statusLabels for them.
      * @param interpolation passes on interpolation value
      */
     public void render(float interpolation) {
@@ -98,8 +98,8 @@ public class View {
     }
 
     /**
-     * prepares the background, so it does not need to be drawn every frame
-     * @param g
+     * Prepares the background, so it does not need to be drawn every frame.
+     * @param g graphics context to be drawn to.
      */
     private void drawBackground(Graphics2D g) {
         g.setBackground(Color.WHITE);
@@ -114,8 +114,8 @@ public class View {
     }
 
     /**
-     * A method for modifying font size for a certain graphics context
-     * @param g graphics context
+     * A method for modifying font size for a certain graphics context.
+     * @param g graphics context to be drawn to
      * @param size multiplier for font size compared to previous size
      */
     private void setFontSize(Graphics2D g, float size) {

@@ -12,6 +12,9 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static project.elevator.ElevatorConstants.*;
 
+/**
+ * Does some Tests for the Elevator Class
+ */
 public class ElevatorTest {
 
     @ParameterizedTest
